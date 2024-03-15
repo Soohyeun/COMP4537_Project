@@ -1,31 +1,31 @@
-const http = require('http')
+const express = require('express');
 
 /**
  * Responsible for API server methods.
  */
-class HttpServer {
+class ExpressServer {
     constructor(port) {
         this.port = port;
+        this.app = express(); // Create an instance of express
+        this.app.use(express.json()); // Use middleware to parse JSON bodies
     }
 
     /**
-     * Initializes the HTTP server.
+     * Initializes the Express server.
      */
     createServer = () => {
-        http.createServer((req, res) => {
-            const method = req.method.toUpperCase();
+        // Define the route for POST request at '/authenticate'
+        this.app.post('/authenticate', (req, res) => {
+            this.handleAuthentication(req, res);
+        });
 
-            const url = new URL(req.url, `http://${req.headers.host}`);
+        // Define the default route for all other requests
+        this.app.all('*', (req, res) => {
+            res.status(200).send('Welcome to the server.');
+        });
 
-            if (method == "POST" && url.pathname == "/authenticate") {
-                this.handleAuthentication(req, res); // TODO: Create a new class that deals with Authentication
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/html',
-                });
-                res.end("Welcome to the server.");
-            }
-        }).listen(this.port, () => {
+        // Start the Express server
+        this.app.listen(this.port, () => {
             console.log(`Server is running and listening on port ${this.port}`);
         });
     }
@@ -37,6 +37,7 @@ class HttpServer {
      */
     handleAuthentication = (req, res) => {
         // TODO: Implement authentication logic here.
+        // For example, you can access request body using req.body
     }
 
     start = () => {
@@ -44,6 +45,6 @@ class HttpServer {
     }
 }
 
-const myServer = new HttpServer(process.env.PORT || 8888);
+const myServer = new ExpressServer(process.env.PORT || 8888);
 
 myServer.start();
