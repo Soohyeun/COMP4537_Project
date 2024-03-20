@@ -11,7 +11,8 @@ def generate_text(prompt):
 
 
 prompt = """
-user: What is computer science
+What is computer science?
 """
+
 res = generate_text(prompt)
 print(res)
