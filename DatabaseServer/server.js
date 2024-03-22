@@ -1,25 +1,23 @@
+"use strict";
 const express = require("express");
 
+const Database = require("./database");
+
 /**
- * Responsible for API server methods.
+ * Responsible for Database API server methods.
  */
-class AuthenticationServer {
+class DatabaseServer {
   constructor(port) {
     this.port = port;
     this.app = express(); // Create an instance of express
     this.app.use(express.json()); // Use middleware to parse JSON bodies
-
+    this.db = new Database();
   }
 
   /**
    * Initializes the Express server.
    */
   createServer = () => {
-    // Define the route for POST request at '/authenticate'
-    this.app.post("/authenticate", (req, res) => {
-      this.handleAuthentication(req, res);
-    });
-
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
       res.status(200).send("Welcome to the server.");
@@ -31,21 +29,10 @@ class AuthenticationServer {
     });
   };
 
-  /**
-   *
-   * @param {*} req
-   * @param {*} res
-   */
-  handleAuthentication = (req, res) => {
-    // TODO: Implement authentication logic here.
-    // For example, you can access request body using req.body
-  };
-
   start = () => {
     this.createServer();
   };
 }
 
-const myServer = new AuthenticationServer(process.env.PORT || 8080);
-
-myServer.start();
+const databaseServer = new DatabaseServer(process.env.PORT || 8080);
+databaseServer.start();
