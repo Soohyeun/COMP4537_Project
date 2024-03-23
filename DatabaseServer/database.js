@@ -19,6 +19,7 @@ const dbSchemas = {
     api_calls INT DEFAULT 0,
     is_admin BOOLEAN NOT NULL DEFAULT false
   `,
+  // TODO: add timestamps?
   prompt: `
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
@@ -53,6 +54,8 @@ class Database {
     this.db.query(`CREATE TABLE IF NOT EXISTS prompt (${dbSchemas.prompt})`);
   }
 
+  // User CRUD methods
+
   async getUsers() {
     return await this.db.query("SELECT * FROM user");
   }
@@ -82,6 +85,23 @@ class Database {
 
   async deleteUser(id) {
     return await this.db.query("DELETE FROM user WHERE id = ?", [id]);
+  }
+
+  // Prompt CRUD methods
+
+  async getPrompts() {
+    return await this.db.query("SELECT * FROM prompt");
+  }
+
+  async createPrompt(userId, question, answer) {
+    return await this.db.query(
+      "INSERT INTO prompt (user_id, question, answer) VALUES (?, ?, ?)",
+      [userId, question, answer]
+    );
+  }
+
+  async deletePrompt(id) {
+    return await this.db.query("DELETE FROM prompt WHERE id = ?", [id]);
   }
 }
 

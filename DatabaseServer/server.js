@@ -72,9 +72,36 @@ class DatabaseServer {
     });
 
     // Define prompt routes
-    this.app.post("/prompts", async (req, res) => {});
-    this.app.get("/prompts", async (req, res) => {});
-    this.app.delete("/prompts", async (req, res) => {});
+    this.app.get("/prompts", async (req, res) => {
+      try {
+        const [rows] = await this.db.getPrompts();
+        res.status(200).json(rows);
+      } catch (error) {
+        console.error("Error getting prompts:", error);
+      }
+    });
+
+    this.app.post("/prompts", async (req, res) => {
+      try {
+        const { userId, question, answer } = req.body;
+        await this.db.createPrompt(userId, question, answer);
+        res.status(201).send("Prompt created");
+      } catch (error) {
+        console.error("Error creating prompt:", error);
+        res.status(500).send("Error creating prompt");
+      }
+    });
+
+    this.app.delete("/prompts/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        await this.db.deletePrompt(id);
+        res.status(200).send("Prompt deleted");
+      } catch (error) {
+        console.error("Error deleting prompt:", error);
+        res.status(500).send("Error deleting prompt");
+      }
+    });
 
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
