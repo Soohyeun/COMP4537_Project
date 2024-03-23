@@ -1,6 +1,5 @@
 "use strict";
 const express = require("express");
-
 const Database = require("./database");
 
 /**
@@ -9,8 +8,8 @@ const Database = require("./database");
 class DatabaseServer {
   constructor(port) {
     this.port = port;
-    this.app = express(); // Create an instance of express
-    this.app.use(express.json()); // Use middleware to parse JSON bodies
+    this.app = express();
+    this.app.use(express.json());
     this.db = new Database();
     this.createServer();
   }
@@ -19,6 +18,19 @@ class DatabaseServer {
    * Initializes the Express server.
    */
   createServer() {
+
+    // Define user routes
+    this.app.get("/users", async (req, res) => {});
+    this.app.get("/users/:id", async (req, res) => {});
+    this.app.post("/users", async (req, res) => {});
+    this.app.patch("/users/:id", async (req, res) => {});
+    this.app.delete("/users/:id", async (req, res) => {});
+
+    // Define prompt routes
+    this.app.post("/prompts", async (req, res) => {});
+    this.app.get("/prompts", async (req, res) => {});
+    this.app.delete("/prompts", async (req, res) => {});
+
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
       res.status(200).send("Welcome to the server at " + new Date());
