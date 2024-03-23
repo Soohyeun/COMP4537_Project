@@ -4,7 +4,7 @@ require("dotenv").config();
 
 // get config from .env file
 const dbConfig = {
-  host: process.env.DB_HOST,
+  host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
@@ -36,6 +36,21 @@ class Database {
       connectionLimit: 10,
       queueLimit: 0,
     });
+    console.log("Database connection created.");
+
+    this.initTables()
+      .then(() => {
+        console.log("Tables initialized successfully.");
+      })
+      .catch((error) => {
+        console.error("Error initializing tables:", error);
+      });
+  }
+
+  async initTables() {
+    // Create tables if they don't exist
+    this.db.query(`CREATE TABLE IF NOT EXISTS user (${dbSchemas.user})`);
+    this.db.query(`CREATE TABLE IF NOT EXISTS prompt (${dbSchemas.prompt})`);
   }
 }
 
