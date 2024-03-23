@@ -1,5 +1,5 @@
 "use strict";
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 require("dotenv").config();
 
 // get config from .env file
@@ -51,6 +51,37 @@ class Database {
     // Create tables if they don't exist
     this.db.query(`CREATE TABLE IF NOT EXISTS user (${dbSchemas.user})`);
     this.db.query(`CREATE TABLE IF NOT EXISTS prompt (${dbSchemas.prompt})`);
+  }
+
+  async getUsers() {
+    return await this.db.query("SELECT * FROM user");
+  }
+
+  async getUser(id) {
+    const results = await this.db.query("SELECT * FROM user WHERE id = ?", [
+      id,
+    ]);
+    return results[0].length ? results[0][0] : {};
+  }
+
+  async createUser(email, name, password) {
+    // TODO: handle password hashing
+    return await this.db.query(
+      "INSERT INTO user (email, name, password) VALUES (?, ?)",
+      [email, name, password]
+    );
+  }
+
+  async updateUser(id, name, email, password) {
+    // TODO: handle missing fields (and password hashing)
+    return await this.db.query(
+      "UPDATE user SET name = ?, email = ?, password = ? WHERE id = ?",
+      [name, email, password, id]
+    );
+  }
+
+  async deleteUser(id) {
+    return await this.db.query("DELETE FROM user WHERE id = ?", [id]);
   }
 }
 

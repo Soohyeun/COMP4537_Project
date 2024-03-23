@@ -18,13 +18,58 @@ class DatabaseServer {
    * Initializes the Express server.
    */
   createServer() {
-
     // Define user routes
-    this.app.get("/users", async (req, res) => {});
-    this.app.get("/users/:id", async (req, res) => {});
-    this.app.post("/users", async (req, res) => {});
-    this.app.patch("/users/:id", async (req, res) => {});
-    this.app.delete("/users/:id", async (req, res) => {});
+    this.app.get("/users", async (req, res) => {
+      // TODO: add admin check middleware
+      try {
+        const [rows] = await this.db.getUsers();
+        res.status(200).json(rows);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
+    });
+    this.app.get("/users/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const user = await this.db.getUser(id);
+        res.status(200).json(user);
+      } catch (error) {
+        console.error("Error getting user:", error);
+        res.status(500).send("Error getting user");
+      }
+    });
+    this.app.post("/users", async (req, res) => {
+      try {
+        const { email, name, password } = req.body;
+        await this.db.createUser(email, name, password);
+        res.status(201).send("User created");
+      } catch (error) {
+        console.error("Error creating user:", error);
+        res.status(500).send("Error creating user");
+      }
+    });
+    this.app.patch("/users/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const { email, name, password } = req.body;
+        await this.db.updateUser(id, email, name, password);
+        res.status(200).send("User updated");
+      } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).send("Error updating user");
+      }
+    });
+    this.app.delete("/users/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        await this.db.deleteUser(id);
+        res.status(200).send("User deleted");
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).send("Error deleting user");
+      }
+    });
 
     // Define prompt routes
     this.app.post("/prompts", async (req, res) => {});
