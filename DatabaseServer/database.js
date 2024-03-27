@@ -70,7 +70,7 @@ class Database {
   async createUser(email, name, password) {
     // TODO: handle password hashing
     return await this.db.query(
-      "INSERT INTO user (email, name, password) VALUES (?, ?)",
+      "INSERT INTO user (email, name, password) VALUES (?, ?, ?)",
       [email, name, password]
     );
   }
