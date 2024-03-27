@@ -20,7 +20,6 @@ class ExpressServer {
      * Initializes the Express server.
      */
     createServer = () => {
-
         // Create new user
         this.app.post("/auth/createAccount", async (req, res) => {
             const { username, email, password } = req.body;
@@ -47,20 +46,33 @@ class ExpressServer {
             try {
                 const response = await axios.get(`${DBRoot}/users/${email}`);
                 const userInfo = response.data;
-                const validPassword = await bcrypt.compare(password, userInfo.password);
-                if (validPassword) {
-                    let accessToken = jwt.sign({ data: email }, this.TOKEN_SECRET, {
-                        expiresIn: '1h',
-                    });
-                    res.cookie("jwt", accessToken, { secure: true, httpOnly: true, maxAge: 3600000 });
-                    res
-                        .status(200)
-                        .json({
-                            message: "Login success!",
-                            data: { name: userInfo.name, api_calls: userInfo.api_calls, is_admin: userInfo.is_admin },
-                        });
+                if (userInfo === null || Object.keys(userInfo).length === 0) {
+                    res.status(401).json({ message: "User not found" });
                 } else {
-                    res.status(203).json({ message: "Incorrect Password!" });
+                    const validPassword = await bcrypt.compare(
+                        password,
+                        userInfo.password
+                    );
+                    if (validPassword) {
+                        let accessToken = jwt.sign({ data: email }, this.TOKEN_SECRET, {
+                            expiresIn: "1h",
+                        });
+                        res.cookie("jwt", accessToken, {
+                            secure: true,
+                            httpOnly: true,
+                            maxAge: 3600000,
+                        });
+                        res.status(200).json({
+                            message: "Login success!",
+                            data: {
+                                name: userInfo.name,
+                                api_calls: userInfo.api_calls,
+                                is_admin: userInfo.is_admin,
+                            },
+                        });
+                    } else {
+                        res.status(401).json({ message: "Password error" });
+                    }
                 }
             } catch (error) {
                 console.error(error);
@@ -73,16 +85,16 @@ class ExpressServer {
             jwt.verify(token, this.TOKEN_SECRET, (error, decode) => {
                 if (!error) {
                     res.send(true);
-                  }
-                  else {
-                    console.log('Invalid token');
+                } else {
+                    console.log("Invalid token");
                     res.send(false);
-                  }
-            })
+                }
+            });
         });
 
         this.app.get("/auth/logout", async (req, res) => {
-
+            res.clearCookie("jwt");
+            res.send("Logout successfully");
         });
 
         // Define the default route for all other requests
