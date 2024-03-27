@@ -60,9 +60,9 @@ class Database {
     return await this.db.query("SELECT * FROM user");
   }
 
-  async getUser(id) {
-    const results = await this.db.query("SELECT * FROM user WHERE id = ?", [
-      id,
+  async getUser(email) {
+    const results = await this.db.query("SELECT * FROM user WHERE email = ?", [
+      email,
     ]);
     return results[0].length ? results[0][0] : {};
   }
@@ -70,7 +70,7 @@ class Database {
   async createUser(email, name, password) {
     // TODO: handle password hashing
     return await this.db.query(
-      "INSERT INTO user (email, name, password) VALUES (?, ?)",
+      "INSERT INTO user (email, name, password) VALUES (?, ?, ?)",
       [email, name, password]
     );
   }

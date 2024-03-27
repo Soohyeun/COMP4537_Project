@@ -29,10 +29,10 @@ class DatabaseServer {
         res.status(500).send("Error getting users");
       }
     });
-    this.app.get("/users/:id", async (req, res) => {
+    this.app.get("/users/:email", async (req, res) => {
       try {
-        const { id } = req.params;
-        const user = await this.db.getUser(id);
+        const { email } = req.params;
+        const user = await this.db.getUser(email);
         res.status(200).json(user);
       } catch (error) {
         console.error("Error getting user:", error);
