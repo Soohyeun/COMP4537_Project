@@ -75,7 +75,18 @@ class DatabaseServer {
         res.status(500).send("Error updating user");
       }
     });
-    
+
+    this.app.patch("/users/:id/increment-api-calls", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await this.db.incrementApiCalls(id);
+        res.status(200).send(response);
+      } catch (error) {
+        console.error("Error updating user API calls:", error);
+        res.status(500).send("Error updating user API calls");
+      }
+    });
+
     this.app.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
