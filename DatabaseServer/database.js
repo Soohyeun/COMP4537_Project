@@ -96,8 +96,10 @@ class Database {
 
   // Prompt CRUD methods
 
-  async getPrompts() {
-    return await this.db.query("SELECT * FROM prompt");
+  async getPrompts(userId) {
+    return await this.db.query("SELECT * FROM prompt WHERE user_id = ?", [
+      userId,
+    ]);
   }
 
   async createPrompt(userId, question, answer) {

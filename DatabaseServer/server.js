@@ -99,9 +99,10 @@ class DatabaseServer {
     });
 
     // Define prompt routes
-    this.app.get("/prompts", async (req, res) => {
+    this.app.get("/prompts/:userId", async (req, res) => {
       try {
-        const [rows] = await this.db.getPrompts();
+        const { userId } = req.params;
+        const [rows] = await this.db.getPrompts(userId);
         res.status(200).json(rows);
       } catch (error) {
         console.error("Error getting prompts:", error);
@@ -130,9 +131,9 @@ class DatabaseServer {
       }
     });
 
-    // Define the default route for all other requests
+    // TODO: remove this route in production
     this.app.all("*", (req, res) => {
-      res.status(200).send("Welcome to the server at " + new Date());
+      res.status(200).send("Database Server time: " + new Date());
     });
 
     // Start the Express server

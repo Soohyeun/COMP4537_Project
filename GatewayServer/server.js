@@ -178,9 +178,21 @@ class ExpressServer {
       }
     });
 
+    this.app.get("/prompts/:userId", async (req, res) => {
+      try {
+        const { userId } = req.params;
+        const response = await axiosDB.get(`/prompts/${userId}`);
+        console.log("Prompts:", response.data);
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting prompts:", error);
+        res.status(500).send("Error getting prompts");
+      }
+    });
+
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
-      res.status(200).send("Welcome to the server at " + new Date());
+      res.status(200).send("Gateway Server time: " + new Date());
     });
 
     // Start the Express server
