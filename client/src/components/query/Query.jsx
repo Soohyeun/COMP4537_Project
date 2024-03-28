@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import ChatContainer from "./ChatContainer";
+import Header from "./Header";
 import Footer from "./Footer";
 
 export default function Query() {
@@ -19,9 +20,7 @@ export default function Query() {
 
 	return (
 		<div>
-			<header>
-				<h1>QueriGPT</h1>
-			</header>
+			<Header />
 			<main>
 				{chatHistory.map((chat, index) => (
 					<ChatContainer

@@ -49,15 +49,20 @@ const theme = extendTheme({
 			},
 			"nav ul": {
 				display: "flex",
-			},
-			"nav ul li": {
-				marginLeft: "1.25rem",
-			},
-			"nav ul li a": {
-				color: "brand.600",
-				transition: "color 0.3s",
-				_hover: {
-					color: "brand.500",
+				li: {
+					marginLeft: "1.5rem",
+					a: {
+						color: "brand.600",
+						transition: "color 0.3s",
+						_hover: {
+							color: "brand.400",
+						},
+					},
+					button: {
+						_hover: {
+							color: "brand.400",
+						},
+					},
 				},
 			},
 			main: {
@@ -87,32 +92,32 @@ const theme = extendTheme({
 						padding: "0.625rem",
 					},
 				},
-        ".buttons": {
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "0.5rem",
-          button: {
-            padding: "0.5rem",
-            border: "1px solid",
-            borderColor: "brand.700",
-            borderRadius: "5px",
-            color: "brand.700",
-          },
-          ".resend-button": {
-            _hover: {
-              borderColor: "brand.300",
-              color: "brand.300",
-              opacity: "0.7",
-            },
-          },
-          ".delete-button": {
-            _hover: {
-              borderColor: "red.600",
-              color: "red.600",
-              opacity: "0.7",
-            },
-          },
-        },
+				".buttons": {
+					display: "flex",
+					justifyContent: "flex-end",
+					gap: "0.5rem",
+					button: {
+						padding: "0.5rem",
+						border: "1px solid",
+						borderColor: "brand.700",
+						borderRadius: "5px",
+						color: "brand.700",
+					},
+					".resend-button": {
+						_hover: {
+							borderColor: "brand.300",
+							color: "brand.300",
+							opacity: "0.7",
+						},
+					},
+					".delete-button": {
+						_hover: {
+							borderColor: "red.600",
+							color: "red.600",
+							opacity: "0.7",
+						},
+					},
+				},
 			},
 			".query-count": {
 				color: "brand.800",
@@ -253,6 +258,42 @@ const theme = extendTheme({
 					color: "brand.400",
 				},
 			},
+			".admin-dashboard": {
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "center",
+				alignItems: "center",
+				height: "100vh",
+				table: {
+					borderCollapse: "collapse",
+					width: "80%",
+					margin: "4rem auto",
+					th: {
+						backgroundColor: "brand.200",
+						color: "brand.500",
+						padding: "0.5rem",
+						textAlign: "left",
+					},
+					td: {
+						backgroundColor: "brand.100",
+						color: "brand.500",
+						padding: "0.5rem",
+						textAlign: "left",
+						borderBottom: "0.1px solid",
+						borderColor: "brand.700",
+					},
+					".action-buttons": {
+						display: "flex",
+						gap: "0.5rem",
+						button: {
+							padding: "0.5rem",
+							border: "none",
+							backgroundColor: "transparent",
+              color: "brand.800",
+						},
+					},
+				},
+			},
 		},
 	},
 	components: {
@@ -263,9 +304,9 @@ const theme = extendTheme({
 						_focus: {
 							borderColor: "brand.800",
 						},
-            _hover: {
-              backgroundColor: "transparent",
-            },
+						_hover: {
+							backgroundColor: "transparent",
+						},
 					},
 				},
 			},
