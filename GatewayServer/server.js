@@ -140,6 +140,17 @@ class ExpressServer {
       }
     });
 
+    this.app.delete("/users/:id", checkAdmin, async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await axiosDB.delete(`/users/${id}`);
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
+    });
+
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
       res.status(200).send("Welcome to the server at " + new Date());
