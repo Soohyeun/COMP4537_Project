@@ -70,7 +70,7 @@ class ExpressServer {
    * Initializes the Express server.
    */
   createServer = () => {
-    // Define user routes
+    // Define Auth routes
     this.app.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
@@ -142,6 +142,7 @@ class ExpressServer {
       }
     });
 
+    // Define User routes
     this.app.get("/users", checkAdmin, async (req, res) => {
       try {
         const response = await axiosDB.get("/users");
@@ -163,9 +164,12 @@ class ExpressServer {
       }
     });
 
+    // Define Prompt routes
     this.app.post("/prompts", async (req, res) => {
       try {
-        const { question, answer } = req.body;
+        const { question } = req.body;
+        // TODO: perform ML processing
+        const answer = "I don't know";
         const response = await axiosDB.post("/prompts", {
           userId: req.session.userId,
           question,
@@ -178,9 +182,14 @@ class ExpressServer {
       }
     });
 
-    this.app.get("/prompts/:userId", async (req, res) => {
+    this.app.get("/prompts/:userId?", async (req, res) => {
       try {
-        const { userId } = req.params;
+        // only admin can view prompts for other users
+        if (!req.session.isAdmin && req.params.userId) {
+          res.status(401).json({ error: "Unauthorized" });
+          return;
+        }
+        const userId = req.params.userId || req.session.userId;
         const response = await axiosDB.get(`/prompts/${userId}`);
         console.log("Prompts:", response.data);
         res.status(200).json(response.data);
