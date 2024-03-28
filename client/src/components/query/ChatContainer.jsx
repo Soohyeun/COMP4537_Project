@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 
 ChatContainer.propTypes = {
@@ -13,6 +13,16 @@ export default function ChatContainer(props) {
 	const [query, setQuery] = useState(props.query);
 
 	const resendQuery = () => {
+        if (remainingQueryCount === 0) {
+            console.log("No remaining queries!");
+            return;
+        }
+
+        if (query === "") {
+            console.log("No query to resend!");
+            return;
+        }
+
 		console.log(`Resending query: ${query}`);
 	};
 
