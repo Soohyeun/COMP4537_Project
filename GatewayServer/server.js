@@ -151,6 +151,21 @@ class ExpressServer {
       }
     });
 
+    this.app.post("/prompts", async (req, res) => {
+      try {
+        const { question, answer } = req.body;
+        const response = await axiosDB.post("/prompts", {
+          userId: req.session.userId,
+          question,
+          answer,
+        });
+        res.status(201).send(response.data);
+      } catch (error) {
+        console.error("Error creating prompt:", error);
+        res.status(500).send("Error creating prompt");
+      }
+    });
+
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
       res.status(200).send("Welcome to the server at " + new Date());
