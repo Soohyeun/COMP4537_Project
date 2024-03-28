@@ -33,7 +33,7 @@ class ExpressServer {
         // Create new user
         this.app.post("/auth/hashPassword", async (req, res) => {
             try {
-                const { password } = req.body;
+                const password = req.body.password;
                 const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(password, salt);
                 res.status(200).send(hashedPassword);
