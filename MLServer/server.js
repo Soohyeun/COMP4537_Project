@@ -62,4 +62,4 @@ class MLServer {
   };
 }
 
-const mlServer = new MLServer(process.env.port || 8090);
+const mlServer = new MLServer(process.env.PORT || 8090);
