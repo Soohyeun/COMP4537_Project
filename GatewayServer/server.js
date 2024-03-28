@@ -173,8 +173,14 @@ class ExpressServer {
     this.app.post("/prompts", async (req, res) => {
       try {
         const { question } = req.body;
-        // TODO: perform ML processing
-        const answer = "I don't know";
+        
+        const MLResponse = await axiosML.post("/getAnswer", { question });
+        if (MLResponse.status !== 200) {
+          res.status(500).send("Error getting answer");
+          return;
+        }
+        const answer = MLResponse.data.answer;
+
         const response = await axiosDB.post("/prompts", {
           userId: req.session.userId,
           question,
@@ -182,8 +188,8 @@ class ExpressServer {
         });
         res.status(201).send(response.data);
       } catch (error) {
-        console.error("Error creating prompt:", error);
-        res.status(500).send("Error creating prompt");
+        console.error("Error getting answer:", error);
+        res.status(500).send("Error getting answer");
       }
     });
 
