@@ -20,9 +20,14 @@ export default function Header({ isAdmin }) {
 						<Link to="/query">Query</Link>
 					</li>
 					<li>
-						<button onClick={() => console.log("Logout")}>
+						<Link
+							to="/"
+							onClick={() => {
+								console.log("Logging out...");
+							}}
+						>
 							Logout
-						</button>
+						</Link>
 					</li>
 				</ul>
 			</nav>
