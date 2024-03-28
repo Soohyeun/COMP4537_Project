@@ -74,15 +74,22 @@ class ExpressServer {
     this.app.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
-        const user = await axiosDB.get(`/users/${email}`);
-        // check if user already exists
-        if (user.data.email) {
+        const userInfo = await axiosDB.get(`/users/${email}`);
+
+        if (Object.keys(userInfo).length !== 0) {
           res.status(409).send(`User with email "${email}" already exists`);
           return;
         }
 
-        // TODO: get hashed password via AuthServer
-        const hashedPassword = "12345";
+        // hash password using AuthServer
+        const result = await axiosAuth.post("/auth/hashPassword", {
+          password,
+        });
+        if (result.status !== 200) {
+          res.status(500).send("Error hashing password");
+          return;
+        }
+        const hashedPassword = result.data;
 
         // create new user in database
         const newUser = await axiosDB.post("/users", {
@@ -94,8 +101,6 @@ class ExpressServer {
           res.status(500).send("Error registering user");
           return;
         }
-
-        // TODO: log in user via AuthServer
 
         res.status(200).json("User registered successfully");
       } catch (error) {
@@ -121,18 +126,18 @@ class ExpressServer {
           is_admin: isAdmin,
         } = userInfo.data;
 
-        // TODO: log in user via AuthServer
-        // const authResult = await axiosAuth.post(`/auth/login`, {
-        //   email,
-        //   password,
-        //   hashedPassword,
-        // });
-        // console.log("Auth result:", authResult.data);
-        // res.cookie("jwt", authResult.accessToken, {
-        //   secure: true,
-        //   httpOnly: true,
-        //   maxAge: 3600000,
-        // });
+        const authResult = await axiosAuth.post(`/auth/login`, {
+          email,
+          password,
+          hashedPassword,
+        });
+
+        res.cookie("jwt", authResult.accessToken, {
+          secure: true,
+          httpOnly: true,
+          maxAge: 3600000,
+        });
+
         req.session.userId = id;
         req.session.isAdmin = isAdmin;
         res.status(200).json({ name, isAdmin });
