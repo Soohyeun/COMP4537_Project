@@ -2,14 +2,27 @@
 const express = require("express");
 const Database = require("./database");
 
+const validateApiKey = (req, res, next) => {
+  const apiKey = req.headers["api-key"];
+
+  if (!apiKey || apiKey !== (process.env.DB_API_KEY || "my-secret")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  next(); // API key is valid, proceed to the next middleware
+};
+
 /**
  * Responsible for Database API server methods.
  */
 class DatabaseServer {
   constructor(port) {
     this.port = port;
+
     this.app = express();
     this.app.use(express.json());
+    this.app.use(validateApiKey);
+
     this.db = new Database();
     this.createServer();
   }
@@ -20,7 +33,6 @@ class DatabaseServer {
   createServer() {
     // Define user routes
     this.app.get("/users", async (req, res) => {
-      // TODO: add admin check middleware
       try {
         const [rows] = await this.db.getUsers();
         res.status(200).json(rows);
