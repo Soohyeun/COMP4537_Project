@@ -70,7 +70,11 @@ class ExpressServer {
    * Initializes the Express server.
    */
   createServer = () => {
-    // Define Auth routes
+    /*
+    ======================
+    Define Auth routes
+    ======================
+    */
     this.app.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
@@ -147,7 +151,11 @@ class ExpressServer {
       }
     });
 
-    // Define User routes
+    /*
+    ======================
+    Define User routes
+    ======================
+    */
     this.app.get("/users", checkAdmin, async (req, res) => {
       try {
         const response = await axiosDB.get("/users");
@@ -169,7 +177,11 @@ class ExpressServer {
       }
     });
 
-    // Define Prompt routes
+    /*
+    ======================
+    Define Prompt routes
+    ======================
+    */
     this.app.post("/prompts", async (req, res) => {
       try {
         const { question } = req.body;
