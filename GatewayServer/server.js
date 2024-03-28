@@ -96,15 +96,19 @@ class ExpressServer {
       try {
         const { email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
+
         if (userInfo === null || Object.keys(userInfo).length === 0) {
           res.status(404).send("User not found");
           return;
         }
+
         const {
+          id,
           name,
           password: hashedPassword,
           is_admin: isAdmin,
         } = userInfo.data;
+
         // TODO: log in user via AuthServer
         // const authResult = await axiosAuth.post(`/auth/login`, {
         //   email,
@@ -117,17 +121,23 @@ class ExpressServer {
         //   httpOnly: true,
         //   maxAge: 3600000,
         // });
+        req.session.userId = id;
         req.session.isAdmin = isAdmin;
-        console.log("User data:", userInfo.data);
         res.status(200).json({ name, isAdmin });
       } catch (error) {
-        // console.error("Error logging in:", error);
+        console.error("Error logging in:", error);
         res.status(500).send("Error logging in");
       }
     });
 
     this.app.get("/users", checkAdmin, async (req, res) => {
-      res.status(200).json("User info obtained");
+      try {
+        const response = await axiosDB.get("/users");
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
     });
 
     // Define the default route for all other requests
