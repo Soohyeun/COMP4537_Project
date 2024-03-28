@@ -74,19 +74,45 @@ const theme = extendTheme({
 				border: "0.1px solid",
 				borderRadius: "0.625rem",
 				width: "100%",
-				".delete-button": {
-					alignSelf: "flex-end",
-					padding: "0.5rem",
-					border: "1px solid",
-					borderColor: "brand.700",
-					borderRadius: "5px",
-					color: "brand.700",
-					_hover: {
-						borderColor: "red.600",
-						color: "red.600",
-						opacity: "0.7",
+				textarea: {
+					marginTop: "0.625rem",
+					backgroundColor: "inherit",
+					color: "brand.500",
+					width: "100%",
+					resize: "none",
+					border: "none",
+					_focus: {
+						outline: "1px solid",
+						outlineColor: "brand.400",
+						padding: "0.625rem",
 					},
 				},
+        ".buttons": {
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "0.5rem",
+          button: {
+            padding: "0.5rem",
+            border: "1px solid",
+            borderColor: "brand.700",
+            borderRadius: "5px",
+            color: "brand.700",
+          },
+          ".resend-button": {
+            _hover: {
+              borderColor: "brand.300",
+              color: "brand.300",
+              opacity: "0.7",
+            },
+          },
+          ".delete-button": {
+            _hover: {
+              borderColor: "red.600",
+              color: "red.600",
+              opacity: "0.7",
+            },
+          },
+        },
 			},
 			".query-count": {
 				color: "brand.800",
@@ -114,7 +140,7 @@ const theme = extendTheme({
 				zIndex: 1,
 				div: {
 					position: "flex",
-          flexDirection: "row",
+					flexDirection: "row",
 					input: {
 						padding: "1rem",
 						marginTop: "0.625rem",
@@ -133,7 +159,7 @@ const theme = extendTheme({
 					},
 					button: {
 						backgroundColor: "brand.300",
-            marginLeft: "1rem",
+						marginLeft: "1rem",
 					},
 				},
 			},

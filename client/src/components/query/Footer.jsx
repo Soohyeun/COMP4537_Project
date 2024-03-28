@@ -5,7 +5,7 @@ export default function Footer() {
 	return (
 		<footer>
 			<div>
-				<input placeholder="Message GPT..."></input>
+				<input placeholder="Query GPT..."></input>
                 <IconButton
 					icon={<ArrowUpIcon />}
 					aria-label="Send Message"
