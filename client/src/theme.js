@@ -104,6 +104,14 @@ const theme = extendTheme({
 						color: "brand.700",
 					},
 					".resend-button": {
+						_disabled: {
+							opacity: "0.5",
+							cursor: "not-allowed",
+              _hover: {
+                borderColor: "brand.700",
+                color: "brand.700",
+              },
+						},
 						_hover: {
 							borderColor: "brand.300",
 							color: "brand.300",
@@ -165,6 +173,10 @@ const theme = extendTheme({
 					button: {
 						backgroundColor: "brand.300",
 						marginLeft: "1rem",
+            _disabled: {
+              opacity: "0.5",
+              cursor: "not-allowed",
+            },
 					},
 				},
 			},
@@ -289,7 +301,7 @@ const theme = extendTheme({
 							padding: "0.5rem",
 							border: "none",
 							backgroundColor: "transparent",
-              color: "brand.800",
+							color: "brand.800",
 						},
 					},
 				},

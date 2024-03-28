@@ -11,6 +11,7 @@ ChatContainer.propTypes = {
 export default function ChatContainer(props) {
 	const { remainingQueryCount, response, deleteChat } = props;
 	const [query, setQuery] = useState(props.query);
+	const [disabled, setDisabled] = useState(true);
 
 	const resendQuery = () => {
         if (remainingQueryCount === 0) {
@@ -38,6 +39,9 @@ export default function ChatContainer(props) {
 					value={query}
 					onChange={(event) => {
 						setQuery(event.target.value);
+						if (disabled) {
+							setDisabled(false);
+						}
 					}}
 				/>
 			</div>
@@ -46,7 +50,7 @@ export default function ChatContainer(props) {
 				<p>{response}</p>
 			</div>
 			<div className="buttons">
-				<button className="resend-button" onClick={resendQuery}>
+				<button className="resend-button" onClick={resendQuery} disabled={disabled}>
 					RESEND
 				</button>
 				<button className="delete-button" onClick={deleteChat}>
