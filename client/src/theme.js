@@ -263,6 +263,9 @@ const theme = extendTheme({
 						_focus: {
 							borderColor: "brand.800",
 						},
+            _hover: {
+              backgroundColor: "transparent",
+            },
 					},
 				},
 			},
@@ -278,7 +281,7 @@ const theme = extendTheme({
 					borderRadius: "15px",
 					border: "0.1px solid",
 					borderColor: "brand.700",
-					backgroundColor: "inherit",
+					backgroundColor: "transparent",
 					color: "brand.500",
 					fontSize: "1rem",
 					width: "100%",
