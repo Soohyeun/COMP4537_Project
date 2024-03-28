@@ -1,10 +1,31 @@
 "use strict";
 const express = require("express");
 const axios = require("axios");
+require("dotenv").config();
 
-const AuthRootUrl = process.env.AUTH_URL || "http://localhost:8000";
-const DBRootUrl = process.env.DB_URL || "http://localhost:8080";
-const MLRootUrl = process.env.ML_URL || "http://localhost:8090";
+const axiosDB = axios.create({
+  baseURL: process.env.DB_URL || "http://localhost:8080",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": process.env.DB_API_KEY || "my-secret",
+  },
+});
+
+const axiosAuth = axios.create({
+  baseURL: process.env.AUTH_URL || "http://localhost:8000",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": process.env.AUTH_API_KEY || "my-secret",
+  },
+});
+
+const axiosML = axios.create({
+  baseURL: process.env.ML_URL || "http://localhost:8090",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": process.env.ML_AUTH_KEY || "my-secret",
+  },
+});
 
 /**
  * Responsible for API server methods.
@@ -25,28 +46,32 @@ class ExpressServer {
     this.app.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
-        const user = await axios.get(`${DBRootUrl}/users/${email}`);
+        const user = await axiosDB.get(`/users/${email}`);
         // check if user already exists
         if (user.data.email) {
           res.status(409).send(`User with email "${email}" already exists`);
           return;
         }
+
         // TODO: get hashed password via AuthServer
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = "12345";
+
         // create new user in database
-        const newUser = await axios.post(
-          `${DBRootUrl}/users`,
-          { name, email, password: hashedPassword },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const newUser = await axiosDB.post("/users", {
+          name,
+          email,
+          password: hashedPassword,
+        });
         if (newUser.status !== 201) {
           res.status(500).send("Error registering user");
           return;
         }
+
         // TODO: log in user via AuthServer
+
         res.status(200).json("User registered successfully");
       } catch (error) {
-        console.error("Error registering user:", error);
+        // console.error("Error registering user:", error);
         res.status(500).send("Error registering user");
       }
     });
