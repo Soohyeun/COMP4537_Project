@@ -1,5 +1,7 @@
 "use strict";
 const express = require("express");
+const session = require("express-session");
+const crypto = require("crypto");
 const axios = require("axios");
 require("dotenv").config();
 
@@ -35,6 +37,13 @@ class ExpressServer {
     this.port = port;
     this.app = express(); // Create an instance of express
     this.app.use(express.json()); // Use middleware to parse JSON bodies
+    this.app.use(
+      session({
+        secret: crypto.randomBytes(64).toString("hex"),
+        resave: false,
+        saveUninitialized: true,
+      })
+    );
     this.createServer();
   }
 
