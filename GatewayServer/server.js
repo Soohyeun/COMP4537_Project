@@ -29,6 +29,13 @@ const axiosML = axios.create({
   },
 });
 
+const checkAdmin = (req, res, next) => {
+  if (!req.session.isAdmin) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next(); // user is Admin, proceed to the next middleware
+};
+
 /**
  * Responsible for API server methods.
  */
@@ -88,27 +95,39 @@ class ExpressServer {
     this.app.post("/auth/login", async (req, res) => {
       try {
         const { email, password } = req.body;
-        const user = await axiosDB.get(`/users/${email}`);
-        if (!user.data.email) {
+        const userInfo = await axiosDB.get(`/users/${email}`);
+        if (userInfo === null || Object.keys(userInfo).length === 0) {
           res.status(404).send("User not found");
           return;
         }
-        console.log("User data:", user.data);
-        const authResult = await axios.post(`${AuthRootUrl}/auth/login`, {
-          email,
-          password,
-          hashedPassword: user.data.password,
-        });
-        res.cookie("jwt", authResult.accessToken, {
-          secure: true,
-          httpOnly: true,
-          maxAge: 3600000,
-        });
-        res.status(200).json("User logged in successfully");
+        const {
+          name,
+          password: hashedPassword,
+          is_admin: isAdmin,
+        } = userInfo.data;
+        // TODO: log in user via AuthServer
+        // const authResult = await axiosAuth.post(`/auth/login`, {
+        //   email,
+        //   password,
+        //   hashedPassword,
+        // });
+        // console.log("Auth result:", authResult.data);
+        // res.cookie("jwt", authResult.accessToken, {
+        //   secure: true,
+        //   httpOnly: true,
+        //   maxAge: 3600000,
+        // });
+        req.session.isAdmin = isAdmin;
+        console.log("User data:", userInfo.data);
+        res.status(200).json({ name, isAdmin });
       } catch (error) {
         // console.error("Error logging in:", error);
         res.status(500).send("Error logging in");
       }
+    });
+
+    this.app.get("/users", checkAdmin, async (req, res) => {
+      res.status(200).json("User info obtained");
     });
 
     // Define the default route for all other requests

@@ -41,6 +41,7 @@ class DatabaseServer {
         res.status(500).send("Error getting users");
       }
     });
+
     this.app.get("/users/:email", async (req, res) => {
       try {
         const { email } = req.params;
@@ -51,6 +52,7 @@ class DatabaseServer {
         res.status(500).send("Error getting user");
       }
     });
+
     this.app.post("/users", async (req, res) => {
       try {
         const { email, name, password } = req.body;
@@ -61,6 +63,7 @@ class DatabaseServer {
         res.status(500).send("Error creating user");
       }
     });
+
     this.app.patch("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
@@ -72,6 +75,7 @@ class DatabaseServer {
         res.status(500).send("Error updating user");
       }
     });
+    
     this.app.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
