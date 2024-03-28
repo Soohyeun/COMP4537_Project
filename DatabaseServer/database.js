@@ -83,6 +83,13 @@ class Database {
     );
   }
 
+  async incrementApiCalls(id) {
+    return await this.db.query(
+      "UPDATE user SET api_calls = api_calls + 1 WHERE id = ?",
+      [id]
+    );
+  }
+
   async deleteUser(id) {
     return await this.db.query("DELETE FROM user WHERE id = ?", [id]);
   }

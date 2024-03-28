@@ -36,6 +36,17 @@ const checkAdmin = (req, res, next) => {
   next(); // user is Admin, proceed to the next middleware
 };
 
+const incrementRequestCount = async (req, res, next) => {
+  if (req.session.userId) {
+    // req.session.requestCount = (req.user.requestCount || 0) + 1;
+    const response = await axiosDB.patch(
+      `/users/${req.session.userId}/increment-api-calls`
+    );
+    console.log("Request count updated:", response.data);
+  }
+  next();
+};
+
 /**
  * Responsible for API server methods.
  */
@@ -51,6 +62,7 @@ class ExpressServer {
         saveUninitialized: true,
       })
     );
+    this.app.use(incrementRequestCount);
     this.createServer();
   }
 
