@@ -2,7 +2,16 @@ const express = require("express");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const DBRoot = "http://localhost:8080"; //Todo: Change to DB hosting page
+
+const validateApiKey = (req, res, next) => {
+    const apiKey = req.headers["api-key"];
+
+    if (!apiKey || apiKey !== (process.env.AUTH_API_KEY || "my-secret")) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    next(); // API key is valid, proceed to the next middleware
+};
 
 /**
  * Responsible for API server methods.
@@ -12,6 +21,7 @@ class ExpressServer {
         this.port = port;
         this.app = express(); // Create an instance of express
         this.app.use(express.json()); // Use middleware to parse JSON bodies
+        this.app.use(validateApiKey);
         this.TOKEN_SECRET = require("crypto").randomBytes(64).toString("hex");
         this.createServer();
     }
@@ -21,58 +31,31 @@ class ExpressServer {
      */
     createServer = () => {
         // Create new user
-        this.app.post("/auth/createAccount", async (req, res) => {
-            const { username, email, password } = req.body;
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            const userData = {
-                email: email,
-                name: username,
-                password: hashedPassword,
-            };
-
+        this.app.post("/auth/hashPassword", async (req, res) => {
             try {
-                const response = await axios.post(`${DBRoot}/users`, userData);
-                console.log(response.data);
-                res.status(200).send(response.data);
+                const password = req.body.password;
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                res.status(200).send(hashedPassword);
             } catch (error) {
-                console.error(error.response.data);
-                res.status(500).send(error.response.data);
+                res.status(500).send("Fail to hash password");
             }
         });
 
         this.app.post("/auth/login", async (req, res) => {
-            const { email, password } = req.body;
+            const { email, password, hashedPassword } = req.body;
             try {
-                const response = await axios.get(`${DBRoot}/users/${email}`);
-                const userInfo = response.data;
-                if (userInfo === null || Object.keys(userInfo).length === 0) {
-                    res.status(401).json({ message: "User not found" });
+                const validPassword = await bcrypt.compare(password, hashedPassword);
+                if (validPassword) {
+                    let accessToken = jwt.sign({ data: email }, this.TOKEN_SECRET, {
+                        expiresIn: "1h",
+                    });
+                    res.status(200).json({
+                        message: "Login success!",
+                        accessToken: accessToken,
+                    });
                 } else {
-                    const validPassword = await bcrypt.compare(
-                        password,
-                        userInfo.password
-                    );
-                    if (validPassword) {
-                        let accessToken = jwt.sign({ data: email }, this.TOKEN_SECRET, {
-                            expiresIn: "1h",
-                        });
-                        res.cookie("jwt", accessToken, {
-                            secure: true,
-                            httpOnly: true,
-                            maxAge: 3600000,
-                        });
-                        res.status(200).json({
-                            message: "Login success!",
-                            data: {
-                                name: userInfo.name,
-                                api_calls: userInfo.api_calls,
-                                is_admin: userInfo.is_admin,
-                            },
-                        });
-                    } else {
-                        res.status(401).json({ message: "Password error" });
-                    }
+                    res.status(401).json({ message: "Password error" });
                 }
             } catch (error) {
                 console.error(error);
@@ -80,7 +63,7 @@ class ExpressServer {
             }
         });
 
-        this.app.post("/auth/valifyUser", async (req, res) => {
+        this.app.post("/auth/verifyUser", async (req, res) => {
             const token = req.body.token;
             jwt.verify(token, this.TOKEN_SECRET, (error, decode) => {
                 if (!error) {
@@ -90,11 +73,6 @@ class ExpressServer {
                     res.send(false);
                 }
             });
-        });
-
-        this.app.get("/auth/logout", async (req, res) => {
-            res.clearCookie("jwt");
-            res.send("Logout successfully");
         });
 
         // Define the default route for all other requests
