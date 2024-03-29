@@ -27,15 +27,26 @@ const axiosML = axios.create({
   baseURL: process.env.ML_URL || "http://localhost:8090",
   headers: {
     "Content-Type": "application/json",
-    "api-key": process.env.ML_AUTH_KEY || "my-secret",
+    "api-key": process.env.ML_API_KEY || "my-secret",
   },
 });
 
-const checkAdmin = (req, res, next) => {
+/*
+ * Define Middlwares
+ */
+
+const isAuthenticated = (req, res, next) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next(); // user is authenticated, proceed to the next middleware
+};
+
+const isAdmin = (req, res, next) => {
   if (!req.session.isAdmin) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  next(); // user is Admin, proceed to the next middleware
+  next(); // user is admin, proceed to the next middleware
 };
 
 const incrementRequestCount = async (req, res, next) => {
@@ -65,18 +76,19 @@ class ExpressServer {
       })
     );
     this.app.use(incrementRequestCount);
-    this.app.use(apiMountPoint, this.createRouter());
+    this.app.use(apiMountPoint, this.createAuthRouter());
+    this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
+    this.app.use(apiMountPoint, this.createAdminRouter());
+
     this.createServer();
   }
 
-  createRouter() {
+  /*
+   * Define Auth routes
+   */
+  createAuthRouter() {
     const router = express.Router();
 
-    /*
-    ======================
-    Define Auth routes
-    ======================
-    */
     router.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
@@ -152,37 +164,16 @@ class ExpressServer {
       }
     });
 
-    /*
-    ======================
-    Define User routes
-    ======================
-    */
-    router.get("/users", checkAdmin, async (req, res) => {
-      try {
-        const response = await axiosDB.get("/users");
-        res.status(200).json(response.data);
-      } catch (error) {
-        console.error("Error getting users:", error);
-        res.status(500).send("Error getting users");
-      }
-    });
+    return router;
+  }
 
-    router.delete("/users/:id", checkAdmin, async (req, res) => {
-      try {
-        const { id } = req.params;
-        const response = await axiosDB.delete(`/users/${id}`);
-        res.status(200).json(response.data);
-      } catch (error) {
-        console.error("Error getting users:", error);
-        res.status(500).send("Error getting users");
-      }
-    });
+  /*
+   * Define Authenticated User routes
+   */
+  createAuthenticatedUserRouter() {
+    const router = express.Router();
+    router.use(isAuthenticated);
 
-    /*
-    ======================
-    Define Prompt routes
-    ======================
-    */
     router.post("/prompts", async (req, res) => {
       try {
         const { question } = req.body;
@@ -199,7 +190,7 @@ class ExpressServer {
           question,
           answer,
         });
-        res.status(201).send(response.data);
+        res.status(201).send(MLResponse.data);
       } catch (error) {
         console.error("Error getting answer:", error);
         res.status(500).send("Error getting answer");
@@ -220,6 +211,38 @@ class ExpressServer {
       } catch (error) {
         console.error("Error getting prompts:", error);
         res.status(500).send("Error getting prompts");
+      }
+    });
+
+    return router;
+  }
+
+  /*
+   * Define Admin routes
+   */
+  createAdminRouter() {
+    const router = express.Router();
+    router.use(isAdmin);
+    router.use(isAuthenticated);
+
+    router.get("/users", isAdmin, async (req, res) => {
+      try {
+        const response = await axiosDB.get("/users");
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
+    });
+
+    router.delete("/users/:id", isAdmin, async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await axiosDB.delete(`/users/${id}`);
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
       }
     });
 
