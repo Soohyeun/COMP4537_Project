@@ -2,6 +2,8 @@
 const express = require("express");
 const Database = require("./database");
 
+const apiMountPoint = process.env.API_MOUNT_POINT || "/";
+
 const validateApiKey = (req, res, next) => {
   const apiKey = req.headers["api-key"];
 
@@ -18,21 +20,24 @@ const validateApiKey = (req, res, next) => {
 class DatabaseServer {
   constructor(port) {
     this.port = port;
+    this.db = new Database();
 
     this.app = express();
     this.app.use(express.json());
     this.app.use(validateApiKey);
-
-    this.db = new Database();
+    this.app.use(apiMountPoint, this.createRouter());
     this.createServer();
   }
 
-  /**
-   * Initializes the Express server.
-   */
-  createServer() {
-    // Define user routes
-    this.app.get("/users", async (req, res) => {
+  createRouter() {
+    const router = express.Router();
+
+    /*
+    ======================
+    Define User routes
+    ======================
+    */
+    router.get("/users", async (req, res) => {
       try {
         const [rows] = await this.db.getUsers();
         res.status(200).json(rows);
@@ -42,7 +47,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.get("/users/:email", async (req, res) => {
+    router.get("/users/:email", async (req, res) => {
       try {
         const { email } = req.params;
         const user = await this.db.getUser(email);
@@ -53,7 +58,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.post("/users", async (req, res) => {
+    router.post("/users", async (req, res) => {
       try {
         const { email, name, password } = req.body;
         const newUser = await this.db.createUser(email, name, password);
@@ -64,7 +69,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.patch("/users/:id", async (req, res) => {
+    router.patch("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
         const { email, name, password } = req.body;
@@ -76,7 +81,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.patch("/users/:id/increment-api-calls", async (req, res) => {
+    router.patch("/users/:id/increment-api-calls", async (req, res) => {
       try {
         const { id } = req.params;
         const response = await this.db.incrementApiCalls(id);
@@ -87,7 +92,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.delete("/users/:id", async (req, res) => {
+    router.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
         await this.db.deleteUser(id);
@@ -98,8 +103,12 @@ class DatabaseServer {
       }
     });
 
-    // Define prompt routes
-    this.app.get("/prompts/:userId", async (req, res) => {
+    /*
+    ======================
+    Define Prompt routes
+    ======================
+    */
+    router.get("/prompts/:userId", async (req, res) => {
       try {
         const { userId } = req.params;
         const [rows] = await this.db.getPrompts(userId);
@@ -109,7 +118,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.post("/prompts", async (req, res) => {
+    router.post("/prompts", async (req, res) => {
       try {
         const { userId, question, answer } = req.body;
         await this.db.createPrompt(userId, question, answer);
@@ -120,7 +129,7 @@ class DatabaseServer {
       }
     });
 
-    this.app.delete("/prompts/:id", async (req, res) => {
+    router.delete("/prompts/:id", async (req, res) => {
       try {
         const { id } = req.params;
         await this.db.deletePrompt(id);
@@ -131,9 +140,12 @@ class DatabaseServer {
       }
     });
 
-    // TODO: remove this route in production
+    return router;
+  }
+
+  createServer() {
     this.app.all("*", (req, res) => {
-      res.status(200).send("Database Server time: " + new Date());
+      res.status(404).send("Nothing here!");
     });
 
     // Start the Express server

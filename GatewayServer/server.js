@@ -5,6 +5,8 @@ const crypto = require("crypto");
 const axios = require("axios");
 require("dotenv").config();
 
+const apiMountPoint = process.env.API_MOUNT_POINT || "/";
+
 const axiosDB = axios.create({
   baseURL: process.env.DB_URL || "http://localhost:8080",
   headers: {
@@ -63,24 +65,23 @@ class ExpressServer {
       })
     );
     this.app.use(incrementRequestCount);
+    this.app.use(apiMountPoint, this.createRouter());
     this.createServer();
   }
 
-  /**
-   * Initializes the Express server.
-   */
-  createServer = () => {
+  createRouter() {
+    const router = express.Router();
+
     /*
     ======================
     Define Auth routes
     ======================
     */
-    this.app.post("/auth/register", async (req, res) => {
+    router.post("/auth/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
-
-        if (Object.keys(userInfo).length !== 0) {
+        if (Object.keys(userInfo.data).length !== 0) {
           res.status(409).send(`User with email "${email}" already exists`);
           return;
         }
@@ -108,12 +109,12 @@ class ExpressServer {
 
         res.status(200).json("User registered successfully");
       } catch (error) {
-        // console.error("Error registering user:", error);
+        console.error("Error registering user:", error);
         res.status(500).send("Error registering user");
       }
     });
 
-    this.app.post("/auth/login", async (req, res) => {
+    router.post("/auth/login", async (req, res) => {
       try {
         const { email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
@@ -156,7 +157,7 @@ class ExpressServer {
     Define User routes
     ======================
     */
-    this.app.get("/users", checkAdmin, async (req, res) => {
+    router.get("/users", checkAdmin, async (req, res) => {
       try {
         const response = await axiosDB.get("/users");
         res.status(200).json(response.data);
@@ -166,7 +167,7 @@ class ExpressServer {
       }
     });
 
-    this.app.delete("/users/:id", checkAdmin, async (req, res) => {
+    router.delete("/users/:id", checkAdmin, async (req, res) => {
       try {
         const { id } = req.params;
         const response = await axiosDB.delete(`/users/${id}`);
@@ -182,10 +183,10 @@ class ExpressServer {
     Define Prompt routes
     ======================
     */
-    this.app.post("/prompts", async (req, res) => {
+    router.post("/prompts", async (req, res) => {
       try {
         const { question } = req.body;
-        
+
         const MLResponse = await axiosML.post("/getAnswer", { question });
         if (MLResponse.status !== 200) {
           res.status(500).send("Error getting answer");
@@ -205,7 +206,7 @@ class ExpressServer {
       }
     });
 
-    this.app.get("/prompts/:userId?", async (req, res) => {
+    router.get("/prompts/:userId?", async (req, res) => {
       try {
         // only admin can view prompts for other users
         if (!req.session.isAdmin && req.params.userId) {
@@ -222,9 +223,13 @@ class ExpressServer {
       }
     });
 
+    return router;
+  }
+
+  createServer = () => {
     // Define the default route for all other requests
     this.app.all("*", (req, res) => {
-      res.status(200).send("Gateway Server time: " + new Date());
+      res.status(404).send("Nothing here!");
     });
 
     // Start the Express server
