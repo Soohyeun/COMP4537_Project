@@ -35,11 +35,19 @@ const axiosML = axios.create({
  * Define Middlwares
  */
 
-const isAuthenticated = (req, res, next) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: "Unauthorized" });
+const isAuthenticated = async(req, res, next) => {
+  try {
+    const authResult = await axiosAuth.post(`/auth/verifyUser`, {
+      'token': req.header('auth-token')
+    });
+    if(!authResult.data) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    next(); // user is authenticated, proceed to the next middleware
+
+  } catch(error) {
+    return res.status(500).json(error);
   }
-  next(); // user is authenticated, proceed to the next middleware
 };
 
 const isAdmin = (req, res, next) => {
@@ -130,7 +138,6 @@ class ExpressServer {
       try {
         const { email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
-
         if (userInfo === null || Object.keys(userInfo).length === 0) {
           res.status(404).send("User not found");
           return;
@@ -148,8 +155,7 @@ class ExpressServer {
           password,
           hashedPassword,
         });
-
-        res.cookie("jwt", authResult.accessToken, {
+        res.cookie("jwt", authResult.data.accessToken, {
           secure: true,
           httpOnly: true,
           maxAge: 3600000,
