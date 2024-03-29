@@ -155,7 +155,6 @@ class ExpressServer {
           password,
           hashedPassword,
         });
-        console.log(authResult.data);
         res.cookie("jwt", authResult.data.accessToken, {
           secure: true,
           httpOnly: true,
