@@ -155,6 +155,7 @@ class ExpressServer {
           password,
           hashedPassword,
         });
+        console.log(authResult.data);
         res.cookie("jwt", authResult.data.accessToken, {
           secure: true,
           httpOnly: true,
@@ -218,6 +219,11 @@ class ExpressServer {
         console.error("Error getting prompts:", error);
         res.status(500).send("Error getting prompts");
       }
+    });
+
+    router.get("/logout", async(req, res) => {
+      res.clearCookie("jwt");
+      res.send("Logout successfully");
     });
 
     return router;
