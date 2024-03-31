@@ -1,24 +1,33 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 
 import ChatContainer from "./ChatContainer";
 import Header from "./Header";
 import Footer from "./Footer";
+import URLContext from "../../contexts/URLContext";
 
 export default function Query() {
-	const [chatHistory, setChatHistory] = useState([
-		{
-			queryCounter: 1,
-			query: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-			response:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-		},
-		{
-			queryCounter: 2,
-			query: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-			response:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-		},
-	]);
+	const url = useContext(URLContext);
+	const [chatHistory, setChatHistory] = useState([]);
+
+	useEffect(() => {
+		fetch(`${url}/prompts`, {
+			credentials: "include",
+		})
+			.then((response) => {
+				if (!response.ok) {
+					return response.text().then((text) => {
+						throw new Error(text || "An error occurred");
+					});
+				}
+				return response.json();
+			})
+			.then((data) => {
+				setChatHistory(data);
+			})
+			.catch((error) => {
+				console.error("Error getting prompts:", error);
+			});
+	});
 
 	return (
 		<div>

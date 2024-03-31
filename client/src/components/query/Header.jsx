@@ -1,11 +1,12 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
-import PropType from "prop-types";
+import URLContext from "../../contexts/URLContext";
+import { AdminContext } from "../../contexts/AdminContext";
 
-Header.propTypes = {
-	isAdmin: PropType.bool.isRequired,
-};
+export default function Header() {
+	const { isAdmin } = useContext(AdminContext);
+	const url = useContext(URLContext);
 
-export default function Header({ isAdmin }) {
 	return (
 		<header>
 			<h1>QueriGPT</h1>
@@ -23,7 +24,17 @@ export default function Header({ isAdmin }) {
 						<Link
 							to="/"
 							onClick={() => {
-								console.log("Logging out...");
+								fetch(`${url}/logout`, {
+									method: "GET",
+									credentials: "include",
+								}).then((response) => {
+									if (!response.ok) {
+										throw new Error(
+											"Network response was not ok"
+										);
+									}
+									return;
+								});
 							}}
 						>
 							Logout
