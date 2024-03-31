@@ -4,6 +4,7 @@ const session = require("express-session");
 const crypto = require("crypto");
 const axios = require("axios");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const apiMountPoint = process.env.API_MOUNT_POINT || "/";
@@ -37,8 +38,11 @@ const axiosML = axios.create({
  */
 const isAuthenticated = async(req, res, next) => {
   try {
+    console.log("cookies:", req.cookies);
+    const sessionCookie = req.cookies['connect.sid'];
+    console.log("sessionCookie:", sessionCookie);
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
-      'token': req.header('auth-token')
+      'token': sessionCookie
     });
     if(!authResult.data) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -82,6 +86,7 @@ class ExpressServer {
         credentials: true,
       }
     ));
+    this.app.use(cookieParser());
     this.app.use(
       session({
         secret: crypto.randomBytes(64).toString("hex"),
@@ -212,11 +217,12 @@ class ExpressServer {
     router.get("/prompts/:userId?", async (req, res) => {
       try {
         // only admin can view prompts for other users
-        if (!req.session.isAdmin && req.params.userId) {
-        res.status(401).json({ error: "Unauthorized" });
-        return;
-        }
+        // if (!req.session.isAdmin && req.params.userId) {
+        // res.status(401).json({ error: "Unauthorized" });
+        // return;
+        // }
         const userId = req.params.userId || req.session.userId;
+        console.log("userId:", userId);
         const response = await axiosDB.get(`/prompts/${userId}`);
         console.log("Prompts:", response.data);
         res.status(200).json(response.data);
