@@ -1,39 +1,46 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { IconButton } from "@chakra-ui/react";
 import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
-import Header from "./Header";
+import Header from "../query/Header";
+import URLContext from "../../contexts/URLContext";
+import { AdminContext } from "../../contexts/AdminContext";
 
 export default function Admin() {
-	const [users, setUsers] = useState([
-		{
-			id: 1,
-			username: "Toco",
-			email: "toco@my.bcit.ca",
-			remainingQueryCount: 0,
-		},
-		{
-			id: 2,
-			username: "Terence",
-			email: "terence@my.bcit.ca",
-			remainingQueryCount: 14,
-		},
-		{
-			id: 3,
-			username: "Evon",
-			email: "evon@my.bcit.ca",
-			remainingQueryCount: 5,
-		},
-		{
-			id: 4,
-			username: "Soo",
-			email: "soo@my.bcit.ca",
-			remainingQueryCount: 20,
-		},
-	]);
+	const navigate = useNavigate();
+	const { isAdmin } = useContext(AdminContext);
+	const url = useContext(URLContext);
+	const [users, setUsers] = useState([]);
+
+	useEffect(() => {
+		if (!isAdmin) {
+			navigate("/query");
+			return;
+		}
+
+		fetch(`${url}/users`, {
+			method: "GET",
+			credentials: "include",
+		})
+			.then((response) => {
+				if (!response.ok) {
+					return response.text().then((text) => {
+						throw new Error(text || "An error occurred");
+					});
+				}
+				return response.json();
+			})
+			.then((data) => {
+				setUsers(data);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}, [isAdmin, navigate, url]);
 
 	return (
 		<div className="admin-dashboard">
-			<Header isAdmin={true} />
+			<Header />
 			<table>
 				<thead>
 					<tr>
@@ -83,9 +90,13 @@ export default function Admin() {
 										}
 										aria-label="Delete User"
 										onClick={() =>
-											setUsers(
-												users.filter(
-													(u) => u.id !== user.id
+											fetch(`${url}/users/${user.id}`, {
+												method: "DELETE",
+											}).then(() =>
+												setUsers(
+													users.filter(
+														(u) => u.id !== user.id
+													)
 												)
 											)
 										}

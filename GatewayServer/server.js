@@ -3,6 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const crypto = require("crypto");
 const axios = require("axios");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const apiMountPoint = process.env.API_MOUNT_POINT || "/";
@@ -32,18 +34,18 @@ const axiosML = axios.create({
 });
 
 /*
- * Define Middlwares
+ * Middleware functions
  */
-
 const isAuthenticated = async(req, res, next) => {
   try {
+    const jwtToken = req.cookies.jwt;
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
-      'token': req.header('auth-token')
+      'token': jwtToken
     });
     if(!authResult.data) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    next(); // user is authenticated, proceed to the next middleware
+    next();
 
   } catch(error) {
     return res.status(500).json(error);
@@ -54,7 +56,7 @@ const isAdmin = (req, res, next) => {
   if (!req.session.isAdmin) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  next(); // user is admin, proceed to the next middleware
+  next();
 };
 
 const incrementRequestCount = async (req, res, next) => {
@@ -74,8 +76,15 @@ const incrementRequestCount = async (req, res, next) => {
 class ExpressServer {
   constructor(port) {
     this.port = port;
-    this.app = express(); // Create an instance of express
-    this.app.use(express.json()); // Use middleware to parse JSON bodies
+    this.app = express();
+    this.app.use(express.json());
+    this.app.use(cors(
+      {
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        credentials: true,
+      }
+    ));
+    this.app.use(cookieParser());
     this.app.use(
       session({
         secret: crypto.randomBytes(64).toString("hex"),
@@ -92,7 +101,7 @@ class ExpressServer {
   }
 
   /*
-   * Define Auth routes
+   * Auth routes
    */
   createAuthRouter() {
     const router = express.Router();
@@ -156,11 +165,11 @@ class ExpressServer {
           hashedPassword,
         });
         res.cookie("jwt", authResult.data.accessToken, {
-          secure: true,
+          // secure: true,
+          secure: false,
           httpOnly: true,
           maxAge: 3600000,
         });
-
         req.session.userId = id;
         req.session.isAdmin = isAdmin;
         res.status(200).json({ name, isAdmin });
@@ -174,7 +183,7 @@ class ExpressServer {
   }
 
   /*
-   * Define Authenticated User routes
+   * Authenticated user routes
    */
   createAuthenticatedUserRouter() {
     const router = express.Router();
@@ -182,7 +191,7 @@ class ExpressServer {
 
     router.post("/prompts", async (req, res) => {
       try {
-        const { question } = req.body;
+        const question = req.body.query;
 
         const MLResponse = await axiosML.post("/getAnswer", { question });
         if (MLResponse.status !== 200) {
@@ -190,7 +199,6 @@ class ExpressServer {
           return;
         }
         const answer = MLResponse.data.answer;
-
         const response = await axiosDB.post("/prompts", {
           userId: req.session.userId,
           question,
@@ -207,12 +215,12 @@ class ExpressServer {
       try {
         // only admin can view prompts for other users
         if (!req.session.isAdmin && req.params.userId) {
-          res.status(401).json({ error: "Unauthorized" });
-          return;
+        res.status(401).json({ error: "Unauthorized" });
+        return;
         }
         const userId = req.params.userId || req.session.userId;
         const response = await axiosDB.get(`/prompts/${userId}`);
-        console.log("Prompts:", response.data);
+
         res.status(200).json(response.data);
       } catch (error) {
         console.error("Error getting prompts:", error);
@@ -229,7 +237,7 @@ class ExpressServer {
   }
 
   /*
-   * Define Admin routes
+   * Admin routes
    */
   createAdminRouter() {
     const router = express.Router();
@@ -266,7 +274,6 @@ class ExpressServer {
       res.status(404).send("Nothing here!");
     });
 
-    // Start the Express server
     this.app.listen(this.port, () => {
       console.log(`Server is running and listening on port ${this.port}`);
     });

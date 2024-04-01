@@ -107,10 +107,10 @@ const theme = extendTheme({
 						_disabled: {
 							opacity: "0.5",
 							cursor: "not-allowed",
-              _hover: {
-                borderColor: "brand.700",
-                color: "brand.700",
-              },
+							_hover: {
+								borderColor: "brand.700",
+								color: "brand.700",
+							},
 						},
 						_hover: {
 							borderColor: "brand.300",
@@ -163,7 +163,7 @@ const theme = extendTheme({
 						backgroundColor: "inherit",
 						color: "brand.500",
 						fontSize: "1rem",
-						width: "90%",
+						width: "80%",
 						maxWidth: "50rem",
 						_focus: {
 							outline: "none",
@@ -173,10 +173,10 @@ const theme = extendTheme({
 					button: {
 						backgroundColor: "brand.300",
 						marginLeft: "1rem",
-            _disabled: {
-              opacity: "0.5",
-              cursor: "not-allowed",
-            },
+						_disabled: {
+							opacity: "0.5",
+							cursor: "not-allowed",
+						},
 					},
 				},
 			},
@@ -269,6 +269,10 @@ const theme = extendTheme({
 				_hover: {
 					color: "brand.400",
 				},
+			},
+			".error-message": {
+				color: "red.600",
+				margin: "0.625rem 0",
 			},
 			".admin-dashboard": {
 				display: "flex",

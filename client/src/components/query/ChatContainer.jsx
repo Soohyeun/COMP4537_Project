@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import URLContext from "../../contexts/URLContext";
 import PropTypes from "prop-types";
 
 ChatContainer.propTypes = {
-	remainingQueryCount: PropTypes.number.isRequired,
+	remainingQueryCount: PropTypes.number,
 	query: PropTypes.string.isRequired,
 	response: PropTypes.string.isRequired,
 	deleteChat: PropTypes.func.isRequired,
 };
 
 export default function ChatContainer(props) {
+	const url = useContext(URLContext);
 	const { remainingQueryCount, response, deleteChat } = props;
 	const [query, setQuery] = useState(props.query);
 	const [disabled, setDisabled] = useState(true);
@@ -18,13 +20,34 @@ export default function ChatContainer(props) {
             console.log("No remaining queries!");
             return;
         }
-
         if (query === "") {
             console.log("No query to resend!");
             return;
         }
 
-		console.log(`Resending query: ${query}`);
+		fetch(`${url}/prompts`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ query }),
+		})
+			.then(async (response) => {
+				if (!response.ok) {
+					return response.text().then((text) => {
+						throw new Error(text || "An error occurred");
+					});
+				}
+				return response.json();
+			})
+			.then((data) => {
+				console.log("Response:", data);
+				setDisabled(true);
+			})
+			.catch((error) => {
+				console.error("Error sending query:", error);
+			});
 	};
 
 	return (

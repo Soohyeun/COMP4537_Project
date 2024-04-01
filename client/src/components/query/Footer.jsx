@@ -1,20 +1,43 @@
+import { useContext } from "react";
 import { IconButton } from "@chakra-ui/react";
 import { ArrowUpIcon } from "@chakra-ui/icons";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+import QuerySchema from "./querySchema";
+import URLContext from "../../contexts/URLContext";
+import PropTypes from "prop-types";
 
-const QuerySchema = Yup.object().shape({
-	query: Yup.string().required("Required"),
-});
-
-export default function Footer() {
+export default function Footer({ onQuerySent }) {
+	const url = useContext(URLContext);
 	const formik = useFormik({
 		initialValues: {
 			query: "",
 		},
 		validationSchema: QuerySchema,
 		onSubmit: (values) => {
-			console.log(values);
+			fetch(`${url}/prompts`, {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(values),
+			})
+				.then(async (response) => {
+					if (!response.ok) {
+						return response.text().then((text) => {
+							throw new Error(text || "An error occurred");
+						});
+					}
+					return response.json();
+				})
+				.then((data) => {
+					console.log("Response:", data);
+					formik.resetForm();
+					onQuerySent();
+				})
+				.catch((error) => {
+					console.error("Error sending query:", error);
+				});
 		},
 	});
 
@@ -46,3 +69,7 @@ export default function Footer() {
 		</footer>
 	);
 }
+
+Footer.propTypes = {
+	onQuerySent: PropTypes.func.isRequired,
+};
