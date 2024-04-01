@@ -38,11 +38,9 @@ const axiosML = axios.create({
  */
 const isAuthenticated = async(req, res, next) => {
   try {
-    console.log("cookies:", req.cookies);
-    const sessionCookie = req.cookies['connect.sid'];
-    console.log("sessionCookie:", sessionCookie);
+    const jwtToken = req.cookies.jwt;
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
-      'token': sessionCookie
+      'token': jwtToken
     });
     if(!authResult.data) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -171,7 +169,6 @@ class ExpressServer {
           httpOnly: true,
           maxAge: 3600000,
         });
-
         req.session.userId = id;
         req.session.isAdmin = isAdmin;
         res.status(200).json({ name, isAdmin });
@@ -201,7 +198,6 @@ class ExpressServer {
           return;
         }
         const answer = MLResponse.data.answer;
-
         const response = await axiosDB.post("/prompts", {
           userId: req.session.userId,
           query,
