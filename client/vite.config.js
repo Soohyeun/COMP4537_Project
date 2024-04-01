@@ -1,13 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import ssr from 'vite-plugin-ssr/plugin'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    ssr(),
-  ],
-  ssr: {
-    entry: './src/main.jsx',
+  plugins: [react()],
+  base: '/queri-gpt/',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: '/index.html',
+      },
+    },
   },
-})
+});
