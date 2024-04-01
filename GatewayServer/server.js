@@ -190,9 +190,9 @@ class ExpressServer {
 
     router.post("/prompts", async (req, res) => {
       try {
-        const { query } = req.body;
+        const question = req.body.query;
 
-        const MLResponse = await axiosML.post("/getAnswer", { query });
+        const MLResponse = await axiosML.post("/getAnswer", { question });
         if (MLResponse.status !== 200) {
           res.status(500).send("Error getting answer");
           return;
@@ -200,7 +200,7 @@ class ExpressServer {
         const answer = MLResponse.data.answer;
         const response = await axiosDB.post("/prompts", {
           userId: req.session.userId,
-          query,
+          question,
           answer,
         });
         res.status(201).send(MLResponse.data);
