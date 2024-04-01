@@ -13,7 +13,7 @@ export default function Query() {
 		fetch(`${url}/prompts`, {
 			credentials: "include",
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
 					return response.text().then((text) => {
 						throw new Error(text || "An error occurred");
@@ -27,7 +27,8 @@ export default function Query() {
 			.catch((error) => {
 				console.error("Error getting prompts:", error);
 			});
-	});
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<div>

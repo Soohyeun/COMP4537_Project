@@ -23,7 +23,7 @@ export default function Footer() {
 				},
 				body: JSON.stringify(values),
 			})
-				.then((response) => {
+				.then(async (response) => {
 					if (!response.ok) {
 						return response.text().then((text) => {
 							throw new Error(text || "An error occurred");

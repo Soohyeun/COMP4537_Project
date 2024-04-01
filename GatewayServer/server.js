@@ -165,7 +165,8 @@ class ExpressServer {
           hashedPassword,
         });
         res.cookie("jwt", authResult.data.accessToken, {
-          secure: true,
+          // secure: true,
+          secure: false,
           httpOnly: true,
           maxAge: 3600000,
         });
@@ -213,10 +214,10 @@ class ExpressServer {
     router.get("/prompts/:userId?", async (req, res) => {
       try {
         // only admin can view prompts for other users
-        // if (!req.session.isAdmin && req.params.userId) {
-        // res.status(401).json({ error: "Unauthorized" });
-        // return;
-        // }
+        if (!req.session.isAdmin && req.params.userId) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+        }
         const userId = req.params.userId || req.session.userId;
         console.log("userId:", userId);
         const response = await axiosDB.get(`/prompts/${userId}`);
