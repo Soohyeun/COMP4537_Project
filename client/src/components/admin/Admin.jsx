@@ -20,6 +20,7 @@ export default function Admin() {
 
 		fetch(`${url}/users`, {
 			method: "GET",
+			credentials: "include",
 		})
 			.then((response) => {
 				if (!response.ok) {
@@ -74,7 +75,7 @@ export default function Admin() {
 														? {
 																...u,
 																remainingQueryCount: 20,
-														  }
+														}
 														: u
 												)
 											)
