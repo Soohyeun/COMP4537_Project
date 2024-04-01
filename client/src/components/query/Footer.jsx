@@ -4,8 +4,9 @@ import { ArrowUpIcon } from "@chakra-ui/icons";
 import { useFormik } from "formik";
 import QuerySchema from "./querySchema";
 import URLContext from "../../contexts/URLContext";
+import PropTypes from "prop-types";
 
-export default function Footer() {
+export default function Footer({ onQuerySent }) {
 	const url = useContext(URLContext);
 	const formik = useFormik({
 		initialValues: {
@@ -13,8 +14,6 @@ export default function Footer() {
 		},
 		validationSchema: QuerySchema,
 		onSubmit: (values) => {
-			console.log(values);
-
 			fetch(`${url}/prompts`, {
 				method: "POST",
 				credentials: "include",
@@ -33,6 +32,8 @@ export default function Footer() {
 				})
 				.then((data) => {
 					console.log("Response:", data);
+					formik.resetForm();
+					onQuerySent();
 				})
 				.catch((error) => {
 					console.error("Error sending query:", error);
@@ -68,3 +69,7 @@ export default function Footer() {
 		</footer>
 	);
 }
+
+Footer.propTypes = {
+	onQuerySent: PropTypes.func.isRequired,
+};

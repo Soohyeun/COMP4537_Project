@@ -219,9 +219,8 @@ class ExpressServer {
         return;
         }
         const userId = req.params.userId || req.session.userId;
-        console.log("userId:", userId);
         const response = await axiosDB.get(`/prompts/${userId}`);
-        console.log("Prompts:", response.data);
+
         res.status(200).json(response.data);
       } catch (error) {
         console.error("Error getting prompts:", error);

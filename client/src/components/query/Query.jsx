@@ -9,7 +9,7 @@ export default function Query() {
 	const url = useContext(URLContext);
 	const [chatHistory, setChatHistory] = useState([]);
 
-	useEffect(() => {
+	const fetchHistory = () => {
 		fetch(`${url}/prompts`, {
 			credentials: "include",
 		})
@@ -27,6 +27,10 @@ export default function Query() {
 			.catch((error) => {
 				console.error("Error getting prompts:", error);
 			});
+	}
+
+	useEffect(() => {
+		fetchHistory();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -37,9 +41,9 @@ export default function Query() {
 				{chatHistory.map((chat, index) => (
 					<ChatContainer
 						key={index}
-						remainingQueryCount={20 - chat.queryCounter}
-						query={chat.query}
-						response={chat.response}
+						// remainingQueryCount={20 - chat.queryCounter}
+						query={chat.question}
+						response={chat.answer}
 						deleteChat={() => {
 							setChatHistory((prevChatHistory) =>
 								prevChatHistory.filter((_, i) => i !== index)
@@ -48,7 +52,7 @@ export default function Query() {
 					/>
 				))}
 			</main>
-			<Footer />
+			<Footer onQuerySent={fetchHistory} />
 		</div>
 	);
 }
