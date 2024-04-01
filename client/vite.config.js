@@ -7,4 +7,7 @@ export default defineConfig({
     react(),
     ssr(),
   ],
+  ssr: {
+    entry: './src/main.jsx',
+  },
 })
