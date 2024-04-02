@@ -55,9 +55,9 @@ export default function Admin() {
 					{users.map((user) => (
 						<tr key={user.id}>
 							<td>{user.id}</td>
-							<td>{user.username}</td>
+							<td>{user.name}</td>
 							<td>{user.email}</td>
-							<td>{user.remainingQueryCount}</td>
+							<td>{user.api_calls}</td>
 							<td>
 								<div className="action-buttons">
 									<IconButton
@@ -74,7 +74,7 @@ export default function Admin() {
 													u.id === user.id
 														? {
 																...u,
-																remainingQueryCount: 20,
+																api_calls: 20,
 														}
 														: u
 												)
