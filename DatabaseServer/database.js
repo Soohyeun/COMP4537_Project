@@ -26,6 +26,12 @@ const dbSchemas = {
     question TEXT NOT NULL,
     answer TEXT
   `,
+  api_usage: `
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES user(id) ON DELETE CASCADE,
+    route VARCHAR(255) NOT NULL,
+    count INT DEFAULT 0
+  `,
 };
 
 class Database {
@@ -52,6 +58,9 @@ class Database {
     // Create tables if they don't exist
     this.db.query(`CREATE TABLE IF NOT EXISTS user (${dbSchemas.user})`);
     this.db.query(`CREATE TABLE IF NOT EXISTS prompt (${dbSchemas.prompt})`);
+    this.db.query(
+      `CREATE TABLE IF NOT EXISTS api_usage (${dbSchemas.api_usage})`
+    );
   }
 
   // User CRUD methods
