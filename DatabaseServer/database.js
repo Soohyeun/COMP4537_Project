@@ -91,18 +91,6 @@ class Database {
     );
   }
 
-  async incrementApiCalls(id) {
-    await this.db.query(
-      "UPDATE user SET api_calls = api_calls + 1 WHERE id = ?",
-      [id]
-    );
-    const [updatedRow] = await this.db.query(
-      "SELECT * FROM user WHERE id = ?",
-      [id]
-    );
-    return updatedRow.length ? updatedRow[0].api_calls : null;
-  }
-
   async getTotalApiUsage() {
     const [rows] = await this.db.query(
       "SELECT route, SUM(count) as total FROM api_usage GROUP BY route"

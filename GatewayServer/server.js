@@ -58,17 +58,6 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-const incrementRequestCount = async (req, res, next) => {
-  if (req.session.userId) {
-    const response = await axiosDB.patch(
-      `/users/${req.session.userId}/increment-api-calls`
-    );
-    if (response.data.api_calls) {
-      res.setHeader("X-Api-Calls", response.data.api_calls);
-    }
-  }
-  next();
-};
 
 const incrementApiUsage = async (req, res, next) => {
   // TODO: include hhtp method, X-Max-Api-Calls-Exceeded boolean
@@ -106,7 +95,6 @@ class ExpressServer {
         saveUninitialized: true,
       })
     );
-    // this.app.use(incrementRequestCount);
     this.app.use(incrementApiUsage);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
