@@ -70,7 +70,17 @@ const incrementRequestCount = async (req, res, next) => {
   next();
 };
 
-// TODO: middleware to track http methods
+const incrementApiUsage = async (req, res, next) => {
+  if (req.session.userId) {
+    const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
+      route: req.originalUrl,
+    });
+    if (response.data.api_calls) {
+      res.setHeader("X-Api-Calls", response.data.api_calls);
+    }
+  }
+  next();
+};
 
 /**
  * Responsible for API server methods.
@@ -95,6 +105,7 @@ class ExpressServer {
       })
     );
     this.app.use(incrementRequestCount);
+    this.app.use(incrementApiUsage);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
     this.app.use(apiMountPoint, this.createAdminRouter());

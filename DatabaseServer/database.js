@@ -30,7 +30,7 @@ const dbSchemas = {
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
     route VARCHAR(255) NOT NULL,
-    count INT DEFAULT 0,
+    count INT DEFAULT 1,
     UNIQUE(user_id, route)
   `,
 };
