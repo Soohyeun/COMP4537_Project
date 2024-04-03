@@ -36,7 +36,7 @@ const axiosML = axios.create({
 /*
  * Middleware functions
  */
-const isAuthenticated = async (req, res, next) => {
+const isAuthenticatedMiddleware = async (req, res, next) => {
   try {
     const jwtToken = req.cookies.jwt;
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
@@ -51,23 +51,27 @@ const isAuthenticated = async (req, res, next) => {
   }
 };
 
-const isAdmin = (req, res, next) => {
+const isAdminMiddleware = (req, res, next) => {
   if (!req.session.isAdmin) {
     return res.status(401).json({ error: "UNAUTHORIZED" });
   }
   next();
 };
 
-const incrementApiUsage = async (req, res, next) => {
+const incrementApiUsage = async (req, res) => {
+  const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
+    route: req.originalUrl,
+    method: req.method,
+  });
+  if (response.data.api_calls) {
+    res.setHeader("X-Api-Calls", response.data.api_calls);
+    res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls >= 20);
+  }
+};
+
+const incrementApiUsageMiddleware = async (req, res, next) => {
   if (req.session.userId) {
-    const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
-      route: req.originalUrl,
-      method: req.method,
-    });
-    if (response.data.api_calls) {
-      res.setHeader("X-Api-Calls", response.data.api_calls);
-      res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls >= 20);
-    }
+    await incrementApiUsage(req, res);
   }
   next();
 };
@@ -94,7 +98,7 @@ class ExpressServer {
         saveUninitialized: true,
       })
     );
-    this.app.use(incrementApiUsage);
+    this.app.use(incrementApiUsageMiddleware);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
     this.app.use(apiMountPoint, this.createAdminRouter());
@@ -138,6 +142,7 @@ class ExpressServer {
           return;
         }
 
+        await incrementApiUsage(req, res);
         res.status(200).json("User registered successfully");
       } catch (error) {
         console.error("Error registering user:", error);
@@ -174,6 +179,8 @@ class ExpressServer {
         });
         req.session.userId = id;
         req.session.isAdmin = isAdmin;
+
+        await incrementApiUsage(req, res);
         res.status(200).json({ name, isAdmin });
       } catch (error) {
         console.error("Error logging in:", error);
@@ -189,7 +196,7 @@ class ExpressServer {
    */
   createAuthenticatedUserRouter() {
     const router = express.Router();
-    router.use(isAuthenticated);
+    router.use(isAuthenticatedMiddleware);
 
     router.post("/prompts", async (req, res) => {
       try {
@@ -243,8 +250,8 @@ class ExpressServer {
    */
   createAdminRouter() {
     const router = express.Router();
-    router.use(isAdmin);
-    router.use(isAuthenticated);
+    router.use(isAdminMiddleware);
+    router.use(isAuthenticatedMiddleware);
 
     router.get("/users", async (req, res) => {
       try {
