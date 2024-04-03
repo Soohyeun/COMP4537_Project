@@ -92,6 +92,41 @@ class DatabaseServer {
       }
     });
 
+    router.get("/api-calls", async (req, res) => {
+      try {
+        const response = await this.db.getTotalApiUsage();
+        res.status(200).send(response);
+      } catch (error) {
+        console.error("Error getting user API usage:", error);
+        res.status(500).send("Error getting user API usage");
+      }
+    });
+
+    router.get("/api-calls/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await this.db.getUserApiUsage(id);
+        res.status(200).send(response);
+      } catch (error) {
+        console.error("Error getting user API usage:", error);
+        res.status(500).send("Error getting user API usage");
+      }
+    });
+
+    router.put("/api-calls/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await this.db.incrementUserApiUsage(
+          id,
+          req.body.route
+        );
+        res.status(200).send({ api_calls: response });
+      } catch (error) {
+        console.error("Error updating user API calls:", error);
+        res.status(500).send("Error updating user API calls: ");
+      }
+    });
+
     router.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;

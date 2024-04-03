@@ -30,7 +30,8 @@ const dbSchemas = {
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
     route VARCHAR(255) NOT NULL,
-    count INT DEFAULT 0
+    count INT DEFAULT 0,
+    UNIQUE(user_id, route)
   `,
 };
 
@@ -103,6 +104,34 @@ class Database {
       [id]
     );
     return updatedRow.length ? updatedRow[0].api_calls : null;
+  }
+
+  async getTotalApiUsage() {
+    const [rows] = await this.db.query(
+      "SELECT route, SUM(count) as total FROM api_usage GROUP BY route"
+    );
+    return rows;
+  }
+
+  async getUserApiUsage(id) {
+    const [rows] = await this.db.query(
+      "SELECT route, count FROM api_usage WHERE user_id = ?",
+      [id]
+    );
+    return rows;
+  }
+
+  async incrementUserApiUsage(id, route) {
+    await this.db.query(
+      "INSERT INTO api_usage (user_id, route) VALUES (?, ?) ON DUPLICATE KEY UPDATE count = count + 1",
+      [id, route]
+    );
+    // return sum of all of user's API calls
+    const [updatedRow] = await this.db.query(
+      "SELECT SUM(count) as total FROM api_usage WHERE user_id = ?",
+      [id]
+    );
+    return updatedRow.length ? updatedRow[0].total : null;
   }
 
   async deleteUser(id) {
