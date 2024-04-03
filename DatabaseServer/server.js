@@ -97,8 +97,8 @@ class DatabaseServer {
         const response = await this.db.getTotalApiUsage();
         res.status(200).send(response);
       } catch (error) {
-        console.error("Error getting user API usage:", error);
-        res.status(500).send("Error getting user API usage");
+        console.error("Error getting API calls:", error);
+        res.status(500).send("Error getting API calls");
       }
     });
 
@@ -108,8 +108,8 @@ class DatabaseServer {
         const response = await this.db.getUserApiUsage(id);
         res.status(200).send(response);
       } catch (error) {
-        console.error("Error getting user API usage:", error);
-        res.status(500).send("Error getting user API usage");
+        console.error("Error getting user API calls:", error);
+        res.status(500).send("Error getting user API calls");
       }
     });
 
@@ -122,8 +122,19 @@ class DatabaseServer {
         );
         res.status(200).send({ api_calls: response });
       } catch (error) {
-        console.error("Error updating user API calls:", error);
-        res.status(500).send("Error updating user API calls: ");
+        console.error("Error incrementing user API calls:", error);
+        res.status(500).send("Error incrementing user API calls: ");
+      }
+    });
+
+    router.patch("/api-calls/:id/reset", async (req, res) => {
+      try {
+        const { id } = req.params;
+        await this.db.resetApiUsage(id);
+        res.status(200).send("API usage counters reset");
+      } catch (error) {
+        console.error("Error resetting user API calls:", error);
+        res.status(500).send("Error resetting user API calls: ");
       }
     });
 

@@ -134,6 +134,12 @@ class Database {
     return updatedRow.length ? updatedRow[0].total : null;
   }
 
+  async resetApiUsage(id) {
+    await this.db.query("UPDATE api_usage SET count = 0 WHERE user_id = ?", [
+      id,
+    ]);
+  }
+
   async deleteUser(id) {
     return await this.db.query("DELETE FROM user WHERE id = ?", [id]);
   }
