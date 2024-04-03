@@ -66,7 +66,7 @@ const incrementApiUsage = async (req, res, next) => {
     });
     if (response.data.api_calls) {
       res.setHeader("X-Api-Calls", response.data.api_calls);
-      res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls <= 20);
+      res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls >= 20);
     }
   }
   next();
@@ -146,7 +146,6 @@ class ExpressServer {
     });
 
     router.post("/auth/login", async (req, res) => {
-      console.log("Login request received: ", req.body);
       try {
         const { email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
@@ -217,7 +216,7 @@ class ExpressServer {
     router.get("/prompts/:userId?", async (req, res) => {
       try {
         // only admin can view prompts for other users
-        if (!req.session.isAdmin && req.params.userId) {
+        if (req.params.userId && !req.session.isAdmin) {
           res.status(401).json({ error: "Unauthorized" });
           return;
         }
