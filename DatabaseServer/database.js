@@ -16,15 +16,21 @@ const dbSchemas = {
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    api_calls INT DEFAULT 0,
     is_admin BOOLEAN NOT NULL DEFAULT false
   `,
-  // TODO: add timestamps?
   prompt: `
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
     question TEXT NOT NULL,
     answer TEXT
+  `,
+  api_usage: `
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES user(id) ON DELETE CASCADE,
+    route VARCHAR(255) NOT NULL,
+    method VARCHAR(255) NOT NULL,
+    count INT DEFAULT 1,
+    UNIQUE(user_id, route, method)
   `,
 };
 
@@ -52,13 +58,15 @@ class Database {
     // Create tables if they don't exist
     this.db.query(`CREATE TABLE IF NOT EXISTS user (${dbSchemas.user})`);
     this.db.query(`CREATE TABLE IF NOT EXISTS prompt (${dbSchemas.prompt})`);
+    this.db.query(
+      `CREATE TABLE IF NOT EXISTS api_usage (${dbSchemas.api_usage})`
+    );
   }
 
   // User CRUD methods
 
   async getUsers() {
-    // TODO: remove password field
-    return await this.db.query("SELECT * FROM user");
+    return await this.db.query("SELECT id, email, name, is_admin FROM user");
   }
 
   async getUser(email) {
@@ -69,7 +77,6 @@ class Database {
   }
 
   async createUser(email, name, password) {
-    // TODO: handle password hashing
     return await this.db.query(
       "INSERT INTO user (email, name, password) VALUES (?, ?, ?)",
       [email, name, password]
@@ -77,23 +84,43 @@ class Database {
   }
 
   async updateUser(id, name, email, password) {
-    // TODO: handle missing fields (and password hashing)
     return await this.db.query(
       "UPDATE user SET name = ?, email = ?, password = ? WHERE id = ?",
       [name, email, password, id]
     );
   }
 
-  async incrementApiCalls(id) {
-    await this.db.query(
-      "UPDATE user SET api_calls = api_calls + 1 WHERE id = ?",
+  async getTotalApiUsage() {
+    const [rows] = await this.db.query(
+      "SELECT route, SUM(count) as total FROM api_usage GROUP BY route"
+    );
+    return rows;
+  }
+
+  async getUserApiUsage(id) {
+    const [rows] = await this.db.query(
+      "SELECT route, method, count FROM api_usage WHERE user_id = ?",
       [id]
+    );
+    return rows;
+  }
+
+  async incrementUserApiUsage(id, route, method) {
+    await this.db.query(
+      "INSERT INTO api_usage (user_id, route, method) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count = count + 1",
+      [id, route, method]
     );
     const [updatedRow] = await this.db.query(
-      "SELECT * FROM user WHERE id = ?",
+      "SELECT SUM(count) as total FROM api_usage WHERE user_id = ?",
       [id]
     );
-    return updatedRow.length ? updatedRow[0].api_calls : null;
+    return updatedRow.length ? updatedRow[0].total : null;
+  }
+
+  async resetApiUsage(id) {
+    await this.db.query("UPDATE api_usage SET count = 0 WHERE user_id = ?", [
+      id,
+    ]);
   }
 
   async deleteUser(id) {

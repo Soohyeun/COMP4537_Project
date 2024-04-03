@@ -81,17 +81,6 @@ class DatabaseServer {
       }
     });
 
-    router.patch("/users/:id/increment-api-calls", async (req, res) => {
-      try {
-        const { id } = req.params;
-        const response = await this.db.incrementApiCalls(id);
-        res.status(200).send({ api_calls: response });
-      } catch (error) {
-        console.error("Error updating user API calls:", error);
-        res.status(500).send("Error updating user API calls: ");
-      }
-    });
-
     router.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
@@ -100,6 +89,54 @@ class DatabaseServer {
       } catch (error) {
         console.error("Error deleting user:", error);
         res.status(500).send("Error deleting user");
+      }
+    });
+
+    router.get("/api-calls", async (req, res) => {
+      try {
+        const response = await this.db.getTotalApiUsage();
+        res.status(200).send(response);
+      } catch (error) {
+        console.error("Error getting API calls:", error);
+        res.status(500).send("Error getting API calls");
+      }
+    });
+
+    router.get("/api-calls/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await this.db.getUserApiUsage(id);
+        res.status(200).send(response);
+      } catch (error) {
+        console.error("Error getting user API calls:", error);
+        res.status(500).send("Error getting user API calls");
+      }
+    });
+
+    router.put("/api-calls/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        console.log("api-calls req.body", req.body);
+        const response = await this.db.incrementUserApiUsage(
+          id,
+          req.body.route,
+          req.body.method
+        );
+        res.status(200).send({ api_calls: response });
+      } catch (error) {
+        console.error("Error incrementing user API calls:", error);
+        res.status(500).send("Error incrementing user API calls: ");
+      }
+    });
+
+    router.patch("/api-calls/:id/reset", async (req, res) => {
+      try {
+        const { id } = req.params;
+        await this.db.resetApiUsage(id);
+        res.status(200).send("API usage counters reset");
+      } catch (error) {
+        console.error("Error resetting user API calls:", error);
+        res.status(500).send("Error resetting user API calls: ");
       }
     });
 

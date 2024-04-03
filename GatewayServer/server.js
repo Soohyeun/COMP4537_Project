@@ -53,24 +53,24 @@ const isAuthenticated = async (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
   if (!req.session.isAdmin) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "UNAUTHORIZED" });
   }
   next();
 };
 
-const incrementRequestCount = async (req, res, next) => {
+const incrementApiUsage = async (req, res, next) => {
   if (req.session.userId) {
-    const response = await axiosDB.patch(
-      `/users/${req.session.userId}/increment-api-calls`
-    );
+    const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
+      route: req.originalUrl,
+      method: req.method,
+    });
     if (response.data.api_calls) {
       res.setHeader("X-Api-Calls", response.data.api_calls);
+      res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls <= 20);
     }
   }
   next();
 };
-
-// TODO: middleware to track http methods
 
 /**
  * Responsible for API server methods.
@@ -94,7 +94,7 @@ class ExpressServer {
         saveUninitialized: true,
       })
     );
-    this.app.use(incrementRequestCount);
+    this.app.use(incrementApiUsage);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
     this.app.use(apiMountPoint, this.createAdminRouter());
@@ -247,7 +247,7 @@ class ExpressServer {
     router.use(isAdmin);
     router.use(isAuthenticated);
 
-    router.get("/users", isAdmin, async (req, res) => {
+    router.get("/users", async (req, res) => {
       try {
         const response = await axiosDB.get("/users");
         res.status(200).json(response.data);
@@ -257,10 +257,21 @@ class ExpressServer {
       }
     });
 
-    router.delete("/users/:id", isAdmin, async (req, res) => {
+    router.delete("/users/:id", async (req, res) => {
       try {
         const { id } = req.params;
         const response = await axiosDB.delete(`/users/${id}`);
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
+    });
+
+    router.patch("/api-calls/:id/reset", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const response = await axiosDB.patch(`/api-calls/${id}/reset`);
         res.status(200).json(response.data);
       } catch (error) {
         console.error("Error getting users:", error);
