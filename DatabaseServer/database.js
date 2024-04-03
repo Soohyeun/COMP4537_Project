@@ -84,7 +84,6 @@ class Database {
   }
 
   async updateUser(id, name, email, password) {
-    // TODO: handle missing fields (and password hashing)
     return await this.db.query(
       "UPDATE user SET name = ?, email = ?, password = ? WHERE id = ?",
       [name, email, password, id]

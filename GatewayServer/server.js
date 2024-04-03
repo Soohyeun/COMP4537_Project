@@ -58,9 +58,7 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-
 const incrementApiUsage = async (req, res, next) => {
-  // TODO: include hhtp method, X-Max-Api-Calls-Exceeded boolean
   if (req.session.userId) {
     const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
       route: req.originalUrl,
@@ -68,6 +66,7 @@ const incrementApiUsage = async (req, res, next) => {
     });
     if (response.data.api_calls) {
       res.setHeader("X-Api-Calls", response.data.api_calls);
+      res.setHeader("X-Api-Calls-Exceeded", response.data.api_calls <= 20);
     }
   }
   next();
