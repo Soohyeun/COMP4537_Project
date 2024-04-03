@@ -278,6 +278,16 @@ class ExpressServer {
       }
     });
 
+    router.get("/api-calls", async (req, res) => {
+      try {
+        const response = await axiosDB.get("/api-calls");
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting users:", error);
+        res.status(500).send("Error getting users");
+      }
+    });
+
     return router;
   }
 
