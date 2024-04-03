@@ -85,10 +85,10 @@ class DatabaseServer {
       try {
         const { id } = req.params;
         const response = await this.db.incrementApiCalls(id);
-        res.status(200).send(response);
+        res.status(200).send({ api_calls: response });
       } catch (error) {
         console.error("Error updating user API calls:", error);
-        res.status(500).send("Error updating user API calls");
+        res.status(500).send("Error updating user API calls: ");
       }
     });
 

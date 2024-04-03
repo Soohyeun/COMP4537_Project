@@ -36,18 +36,17 @@ const axiosML = axios.create({
 /*
  * Middleware functions
  */
-const isAuthenticated = async(req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
   try {
     const jwtToken = req.cookies.jwt;
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
-      'token': jwtToken
+      token: jwtToken,
     });
-    if(!authResult.data) {
+    if (!authResult.data) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     next();
-
-  } catch(error) {
+  } catch (error) {
     return res.status(500).json(error);
   }
 };
@@ -61,14 +60,17 @@ const isAdmin = (req, res, next) => {
 
 const incrementRequestCount = async (req, res, next) => {
   if (req.session.userId) {
-    // req.session.requestCount = (req.user.requestCount || 0) + 1;
     const response = await axiosDB.patch(
       `/users/${req.session.userId}/increment-api-calls`
     );
-    console.log("Request count updated:", response.data);
+    if (response.data.api_calls) {
+      res.setHeader("X-Api-Calls", response.data.api_calls);
+    }
   }
   next();
 };
+
+// TODO: middleware to track http methods
 
 /**
  * Responsible for API server methods.
@@ -78,12 +80,12 @@ class ExpressServer {
     this.port = port;
     this.app = express();
     this.app.use(express.json());
-    this.app.use(cors(
-      {
+    this.app.use(
+      cors({
         origin: process.env.CLIENT_URL || "http://localhost:5173",
         credentials: true,
-      }
-    ));
+      })
+    );
     this.app.use(cookieParser());
     this.app.use(
       session({
@@ -144,10 +146,11 @@ class ExpressServer {
     });
 
     router.post("/auth/login", async (req, res) => {
+      console.log("Login request received: ", req.body);
       try {
         const { email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
-        if (userInfo === null || Object.keys(userInfo).length === 0) {
+        if (userInfo === null || Object.keys(userInfo.data).length === 0) {
           res.status(404).send("User not found");
           return;
         }
@@ -215,8 +218,8 @@ class ExpressServer {
       try {
         // only admin can view prompts for other users
         if (!req.session.isAdmin && req.params.userId) {
-        res.status(401).json({ error: "Unauthorized" });
-        return;
+          res.status(401).json({ error: "Unauthorized" });
+          return;
         }
         const userId = req.params.userId || req.session.userId;
         const response = await axiosDB.get(`/prompts/${userId}`);
@@ -228,7 +231,7 @@ class ExpressServer {
       }
     });
 
-    router.get("/logout", async(req, res) => {
+    router.get("/logout", async (req, res) => {
       res.clearCookie("jwt");
       res.send("Logout successfully");
     });
