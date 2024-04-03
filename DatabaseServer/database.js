@@ -16,10 +16,8 @@ const dbSchemas = {
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    api_calls INT DEFAULT 0,
     is_admin BOOLEAN NOT NULL DEFAULT false
   `,
-  // TODO: add timestamps?
   prompt: `
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
@@ -30,8 +28,9 @@ const dbSchemas = {
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES user(id) ON DELETE CASCADE,
     route VARCHAR(255) NOT NULL,
+    method VARCHAR(255) NOT NULL,
     count INT DEFAULT 1,
-    UNIQUE(user_id, route)
+    UNIQUE(user_id, route, method)
   `,
 };
 
@@ -67,8 +66,7 @@ class Database {
   // User CRUD methods
 
   async getUsers() {
-    // TODO: remove password field
-    return await this.db.query("SELECT * FROM user");
+    return await this.db.query("SELECT id, email, name, is_admin FROM user");
   }
 
   async getUser(email) {
@@ -79,7 +77,6 @@ class Database {
   }
 
   async createUser(email, name, password) {
-    // TODO: handle password hashing
     return await this.db.query(
       "INSERT INTO user (email, name, password) VALUES (?, ?, ?)",
       [email, name, password]
@@ -115,18 +112,17 @@ class Database {
 
   async getUserApiUsage(id) {
     const [rows] = await this.db.query(
-      "SELECT route, count FROM api_usage WHERE user_id = ?",
+      "SELECT route, method, count FROM api_usage WHERE user_id = ?",
       [id]
     );
     return rows;
   }
 
-  async incrementUserApiUsage(id, route) {
+  async incrementUserApiUsage(id, route, method) {
     await this.db.query(
-      "INSERT INTO api_usage (user_id, route) VALUES (?, ?) ON DUPLICATE KEY UPDATE count = count + 1",
-      [id, route]
+      "INSERT INTO api_usage (user_id, route, method) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count = count + 1",
+      [id, route, method]
     );
-    // return sum of all of user's API calls
     const [updatedRow] = await this.db.query(
       "SELECT SUM(count) as total FROM api_usage WHERE user_id = ?",
       [id]

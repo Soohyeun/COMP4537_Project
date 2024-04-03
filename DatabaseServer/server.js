@@ -81,6 +81,17 @@ class DatabaseServer {
       }
     });
 
+    router.delete("/users/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        await this.db.deleteUser(id);
+        res.status(200).send("User deleted");
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).send("Error deleting user");
+      }
+    });
+
     router.patch("/users/:id/increment-api-calls", async (req, res) => {
       try {
         const { id } = req.params;
@@ -116,9 +127,11 @@ class DatabaseServer {
     router.put("/api-calls/:id", async (req, res) => {
       try {
         const { id } = req.params;
+        console.log("api-calls req.body", req.body);
         const response = await this.db.incrementUserApiUsage(
           id,
-          req.body.route
+          req.body.route,
+          req.body.method
         );
         res.status(200).send({ api_calls: response });
       } catch (error) {
@@ -135,17 +148,6 @@ class DatabaseServer {
       } catch (error) {
         console.error("Error resetting user API calls:", error);
         res.status(500).send("Error resetting user API calls: ");
-      }
-    });
-
-    router.delete("/users/:id", async (req, res) => {
-      try {
-        const { id } = req.params;
-        await this.db.deleteUser(id);
-        res.status(200).send("User deleted");
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        res.status(500).send("Error deleting user");
       }
     });
 
