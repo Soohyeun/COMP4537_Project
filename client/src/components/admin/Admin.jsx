@@ -11,6 +11,7 @@ export default function Admin() {
 	const { isAdmin } = useContext(AdminContext);
 	const url = useContext(URLContext);
 	const [users, setUsers] = useState([]);
+	const [totalApiUsage, setTotalApiUsage] = useState([]);
 
 	useEffect(() => {
 		if (!isAdmin) {
@@ -18,11 +19,11 @@ export default function Admin() {
 			return;
 		}
 
+		// Fetch all users
 		fetch(`${url}/users`, {
-			method: "GET",
 			credentials: "include",
 		})
-			.then((response) => {
+			.then(async (response) => {
 				if (!response.ok) {
 					return response.text().then((text) => {
 						throw new Error(text || "An error occurred");
@@ -32,6 +33,25 @@ export default function Admin() {
 			})
 			.then((data) => {
 				setUsers(data);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
+		// Fetch total API usage
+		fetch(`${url}/api-calls`, {
+			credentials: "include",
+		})
+			.then(async (response) => {
+				if (!response.ok) {
+					return response.text().then((text) => {
+						throw new Error(text || "An error occurred");
+					});
+				}
+				return response.json();
+			})
+			.then((data) => {
+				setTotalApiUsage(data);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -47,7 +67,7 @@ export default function Admin() {
 						<th>ID</th>
 						<th>Username</th>
 						<th>Email</th>
-						<th>Remaining Query Count</th>
+						<th>Query Count</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -69,16 +89,28 @@ export default function Admin() {
 										}
 										aria-label="Reset Query Count"
 										onClick={() =>
-											setUsers(
-												users.map((u) =>
-													u.id === user.id
-														? {
-																...u,
-																api_calls: 20,
-														}
-														: u
-												)
+											fetch(
+												`${url}/api-calls/${user.id}/reset`,
+												{
+													method: "PATCH",
+													credentials: "include",
+												}
 											)
+												.then(() => {
+													setUsers(
+														users.map((u) =>
+															u.id === user.id
+																? {
+																		...u,
+																		api_calls: 0,
+																}
+																: u
+														)
+													);
+												})
+												.catch((error) => {
+													console.error(error);
+												})
 										}
 									/>
 									<IconButton
@@ -92,6 +124,7 @@ export default function Admin() {
 										onClick={() =>
 											fetch(`${url}/users/${user.id}`, {
 												method: "DELETE",
+												credentials: "include",
 											}).then(() =>
 												setUsers(
 													users.filter(
@@ -103,6 +136,22 @@ export default function Admin() {
 									/>
 								</div>
 							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+			<table>
+				<thead>
+					<tr>
+						<th>Route</th>
+						<th>Total API Calls</th>
+					</tr>
+				</thead>
+				<tbody>
+					{totalApiUsage.map((route) => (
+						<tr key={route.route}>
+							<td>{route.route}</td>
+							<td>{route.total}</td>
 						</tr>
 					))}
 				</tbody>
