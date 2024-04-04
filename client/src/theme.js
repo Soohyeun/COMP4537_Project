@@ -80,7 +80,6 @@ const theme = extendTheme({
 				borderRadius: "0.625rem",
 				width: "100%",
 				textarea: {
-					marginTop: "0.625rem",
 					backgroundColor: "inherit",
 					color: "brand.500",
 					width: "100%",
@@ -131,10 +130,13 @@ const theme = extendTheme({
 				color: "brand.800",
 				marginBottom: "1rem",
 			},
+			".warning": {
+				fontSize: "1rem",
+				color: "red.600",
+			},
 			".chat-message": {
 				backgroundColor: "brand.100",
 				padding: "0.625rem",
-				marginBottom: "0.625rem",
 			},
 			".bot label": {
 				color: "brand.300",
@@ -279,11 +281,11 @@ const theme = extendTheme({
 				flexDirection: "column",
 				justifyContent: "center",
 				alignItems: "center",
-				height: "100vh",
+				margin: "8rem auto",
 				table: {
 					borderCollapse: "collapse",
 					width: "80%",
-					margin: "4rem auto",
+					marginBottom: "2rem",
 					th: {
 						backgroundColor: "brand.200",
 						color: "brand.500",

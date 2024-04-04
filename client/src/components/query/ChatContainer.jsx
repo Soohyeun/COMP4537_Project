@@ -3,7 +3,7 @@ import URLContext from "../../contexts/URLContext";
 import PropTypes from "prop-types";
 
 ChatContainer.propTypes = {
-	remainingQueryCount: PropTypes.number,
+	chatHistoryCount: PropTypes.number,
 	query: PropTypes.string.isRequired,
 	response: PropTypes.string.isRequired,
 	deleteChat: PropTypes.func.isRequired,
@@ -11,15 +11,11 @@ ChatContainer.propTypes = {
 
 export default function ChatContainer(props) {
 	const url = useContext(URLContext);
-	const { remainingQueryCount, response, deleteChat } = props;
+	const { chatHistoryCount, response, deleteChat } = props;
 	const [query, setQuery] = useState(props.query);
 	const [disabled, setDisabled] = useState(true);
 
 	const resendQuery = () => {
-        if (remainingQueryCount === 0) {
-            console.log("No remaining queries!");
-            return;
-        }
         if (query === "") {
             console.log("No query to resend!");
             return;
@@ -53,7 +49,7 @@ export default function ChatContainer(props) {
 	return (
 		<div className="chat-container">
 			<p className="query-count">
-				Remaining Query Count: {remainingQueryCount}
+				No. {chatHistoryCount}
 			</p>
 			<div className="chat-message user">
 				<label>User</label>

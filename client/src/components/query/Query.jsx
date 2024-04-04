@@ -8,6 +8,7 @@ import URLContext from "../../contexts/URLContext";
 export default function Query() {
 	const url = useContext(URLContext);
 	const [chatHistory, setChatHistory] = useState([]);
+	const [queryCount] = useState(20);
 
 	const fetchHistory = () => {
 		fetch(`${url}/prompts`, {
@@ -27,21 +28,26 @@ export default function Query() {
 			.catch((error) => {
 				console.error("Error getting prompts:", error);
 			});
-	}
+	};
 
 	useEffect(() => {
 		fetchHistory();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
 		<div>
 			<Header />
 			<main>
+				{chatHistory.length + 16 >= 20 ? (
+					<p className="query-count warning">Exceeded maximum API usage...</p>
+				) : (
+					<p className="query-count">Remaining Query Count: {queryCount - chatHistory.length}</p>
+				)}
 				{chatHistory.map((chat, index) => (
 					<ChatContainer
 						key={index}
-						// remainingQueryCount={20 - chat.queryCounter}
+						chatHistoryCount={index + 1}
 						query={chat.question}
 						response={chat.answer}
 						deleteChat={() => {
