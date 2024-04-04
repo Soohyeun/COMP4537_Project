@@ -96,6 +96,12 @@ class ExpressServer {
         secret: crypto.randomBytes(64).toString("hex"),
         resave: false,
         saveUninitialized: true,
+        cookie: {
+          secure: true,
+          secure: false,
+          httpOnly: true,
+          maxAge: 3600000,
+        },
       })
     );
     this.app.use(incrementApiUsageMiddleware);
