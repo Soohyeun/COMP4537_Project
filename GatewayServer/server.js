@@ -236,7 +236,7 @@ class ExpressServer {
       }
     });
 
-    router.get("/logout", async (req, res) => {
+    router.post("/logout", async (req, res) => {
       res.clearCookie("jwt");
       res.send("Logout successfully");
     });
