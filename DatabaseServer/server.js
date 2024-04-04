@@ -116,7 +116,6 @@ class DatabaseServer {
     router.put("/api-calls/:id", async (req, res) => {
       try {
         const { id } = req.params;
-        console.log("api-calls req.body", req.body);
         const response = await this.db.incrementUserApiUsage(
           id,
           req.body.route,

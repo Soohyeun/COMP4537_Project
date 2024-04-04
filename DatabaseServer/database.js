@@ -66,7 +66,17 @@ class Database {
   // User CRUD methods
 
   async getUsers() {
-    return await this.db.query("SELECT id, email, name, is_admin FROM user");
+    const [rows] = await this.db.query(`
+      SELECT id, email, name, is_admin, COALESCE(SUM(a.count), 0) as api_calls
+      FROM user u
+      LEFT JOIN (
+        SELECT user_id, SUM(count) as count
+        FROM api_usage
+        GROUP BY user_id
+      ) a ON id = user_id
+      GROUP BY id, email, name, is_admin
+      `);
+    return rows;
   }
 
   async getUser(email) {
