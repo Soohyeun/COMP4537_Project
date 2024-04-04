@@ -70,7 +70,7 @@ const incrementApiUsage = async (req, res) => {
 };
 
 const incrementApiUsageMiddleware = async (req, res, next) => {
-  if (req.session.userId) {
+  if (req.method !== 'OPTIONS' && req.session.userId) {
     await incrementApiUsage(req, res);
   }
   next();
