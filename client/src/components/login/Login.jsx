@@ -50,7 +50,7 @@ export default function Login() {
 								return;
 							}
 							
-							navigate("/admin");
+							navigate("/query");
 							return;
 						})
 						.catch((error) => {
