@@ -25,7 +25,7 @@ export default function Header() {
 							to="/"
 							onClick={() => {
 								fetch(`${url}/logout`, {
-									method: "GET",
+									method: "POST",
 									credentials: "include",
 								}).then((response) => {
 									if (!response.ok) {
