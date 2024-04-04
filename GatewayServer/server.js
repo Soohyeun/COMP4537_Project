@@ -98,9 +98,9 @@ class ExpressServer {
         saveUninitialized: true,
         cookie: {
           secure: true,
-          secure: false,
           httpOnly: true,
           maxAge: 3600000,
+          sameSite: "none",
         },
       })
     );
@@ -181,6 +181,7 @@ class ExpressServer {
           secure: true,
           httpOnly: true,
           maxAge: 3600000,
+          sameSite: "none",
         });
         req.session.userId = id;
         req.session.isAdmin = isAdmin;
