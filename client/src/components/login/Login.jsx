@@ -101,7 +101,8 @@ export default function Login() {
 							<p className="error-message">{formikProps.status}</p>
 						)}
 						<Link to="/signup">
-							Do not have an account? Sign Up
+							{/* eslint-disable-next-line react/no-unescaped-entities */}
+							Don't have an account? Sign Up
 						</Link>
 					</Form>
 				)}
