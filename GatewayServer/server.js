@@ -172,8 +172,7 @@ class ExpressServer {
           hashedPassword,
         });
         res.cookie("jwt", authResult.data.accessToken, {
-          // secure: true,
-          secure: false,
+          secure: true,
           httpOnly: true,
           maxAge: 3600000,
         });
@@ -220,16 +219,10 @@ class ExpressServer {
       }
     });
 
-    router.get("/prompts/:userId?", async (req, res) => {
+    router.get("/prompts", async (req, res) => {
       try {
-        // only admin can view prompts for other users
-        if (req.params.userId && !req.session.isAdmin) {
-          res.status(401).json({ error: "Unauthorized" });
-          return;
-        }
-        const userId = req.params.userId || req.session.userId;
+        const userId = req.session.userId;
         const response = await axiosDB.get(`/prompts/${userId}`);
-
         res.status(200).json(response.data);
       } catch (error) {
         console.error("Error getting prompts:", error);
@@ -271,6 +264,17 @@ class ExpressServer {
       } catch (error) {
         console.error("Error getting users:", error);
         res.status(500).send("Error getting users");
+      }
+    });
+
+    router.get("/prompts/:userId", async (req, res) => {
+      try {
+        const { userId } = req.params;
+        const response = await axiosDB.get(`/prompts/${userId}`);
+        res.status(200).json(response.data);
+      } catch (error) {
+        console.error("Error getting prompts:", error);
+        res.status(500).send("Error getting prompts");
       }
     });
 
