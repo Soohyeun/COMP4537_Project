@@ -51,7 +51,7 @@ const isAuthenticatedMiddleware = async (req, res, next) => {
       token: jwtToken,
     });
 
-    if (!authResult.data && !authResult.data.id) {
+    if (Object.keys(authResult.data).length === 0) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
@@ -204,7 +204,6 @@ class ExpressServer {
           httpOnly: true,
           maxAge: 3600000,
           sameSite: "none",
-          partitioned: true,
         });
 
         attachUserData(req, id, email, isAdmin);
