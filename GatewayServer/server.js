@@ -59,10 +59,22 @@ const isAdminMiddleware = (req, res, next) => {
   next();
 };
 
-const incrementApiUsage = async (req, res) => {
-  const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
-    route: req.originalUrl,
+const getApiCallData = (req) => {
+  const path = req.originalUrl;
+  const match = path.match(/\/\w+\/api(\/\w+)/);
+
+  return {
+    route: match ? match[1] : path,
     method: req.method,
+  };
+};
+
+const incrementApiUsage = async (req, res) => {
+  const { route, method } = getApiCallData(req);
+  console.log("Incrementing API usage for", route, method);
+  const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
+    route,
+    method,
   });
   if (response.data.api_calls) {
     res.setHeader("X-Api-Calls", response.data.api_calls);
