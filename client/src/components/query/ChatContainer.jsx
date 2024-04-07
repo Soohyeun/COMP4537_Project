@@ -42,9 +42,6 @@ export default function ChatContainer(props) {
 			})
 			.then((data) => {
 				setDisabled(true);
-			})
-			.catch((error) => {
-				console.error("Error sending query:", error);
 			});
 	};
 

@@ -36,9 +36,6 @@ export default function Admin() {
 			})
 			.then((data) => {
 				setUsers(data);
-			})
-			.catch((error) => {
-				console.error(error);
 			});
 
 		// Fetch total API usage
@@ -55,9 +52,6 @@ export default function Admin() {
 			})
 			.then((data) => {
 				setTotalApiUsage(data);
-			})
-			.catch((error) => {
-				console.error(error);
 			});
 	}, [isAdmin, navigate, url]);
 
@@ -113,9 +107,6 @@ export default function Admin() {
 																: u
 														)
 													);
-												})
-												.catch((error) => {
-													console.error(error);
 												})
 										}
 									/>

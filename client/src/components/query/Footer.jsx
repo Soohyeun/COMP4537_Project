@@ -36,9 +36,6 @@ export default function Footer({ onQuerySent }) {
 				.then((data) => {
 					formik.resetForm();
 					onQuerySent();
-				})
-				.catch((error) => {
-					console.error("Error sending query:", error);
 				});
 		},
 	});

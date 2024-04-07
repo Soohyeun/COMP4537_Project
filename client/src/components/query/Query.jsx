@@ -33,9 +33,6 @@ export default function Query() {
 			})
 			.then((data) => {
 				setChatHistory(data);
-			})
-			.catch((error) => {
-				console.error("Error getting chat history:", error);
 			});
 	};
 

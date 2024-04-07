@@ -54,10 +54,6 @@ export default function Login() {
 
 							navigate("/query");
 							return;
-						})
-						.catch((error) => {
-							actions.setSubmitting(false);
-							actions.setStatus(`Error: ${error.message}`);
 						});
 				}}
 			>
