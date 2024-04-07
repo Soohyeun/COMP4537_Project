@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import ChatContainer from "./ChatContainer";
 import Header from "./Header";
@@ -9,6 +10,7 @@ import en from "../../locales/en.json";
 export default function Query() {
 	const strings = en.query;
 
+	const navigate = useNavigate();
 	const url = useContext(URLContext);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [queryCount] = useState(20);
@@ -19,6 +21,10 @@ export default function Query() {
 		})
 			.then(async (response) => {
 				if (!response.ok) {
+					if (response.status === 401) {
+						navigate("/login");
+					}
+
 					return response.text().then((text) => {
 						throw new Error(text || "An error occurred");
 					});
@@ -29,7 +35,7 @@ export default function Query() {
 				setChatHistory(data);
 			})
 			.catch((error) => {
-				console.error("Error getting prompts:", error);
+				console.error("Error getting chat history:", error);
 			});
 	};
 
