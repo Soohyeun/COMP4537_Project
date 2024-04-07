@@ -1,6 +1,5 @@
 "use strict";
 const express = require("express");
-const session = require("express-session");
 const crypto = require("crypto");
 const axios = require("axios");
 const cors = require("cors");
@@ -37,15 +36,32 @@ const axiosML = axios.create({
 /*
  * Middleware functions
  */
+const attachUserData = (req, id, email, isAdmin) => {
+  req.userData = {
+    id,
+    email,
+    isAdmin,
+  };
+};
+
 const isAuthenticatedMiddleware = async (req, res, next) => {
   try {
     const jwtToken = req.cookies.jwt;
     const authResult = await axiosAuth.post(`/auth/verifyUser`, {
       token: jwtToken,
     });
+
     if (!authResult.data) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+
+    attachUserData(
+      req,
+      authResult.data.id,
+      authResult.data.email,
+      authResult.data.isAdmin
+    );
+
     next();
   } catch (error) {
     return res.status(500).json(error);
@@ -53,7 +69,7 @@ const isAuthenticatedMiddleware = async (req, res, next) => {
 };
 
 const isAdminMiddleware = (req, res, next) => {
-  if (!req.session.isAdmin) {
+  if (!req.userData.isAdmin) {
     return res.status(401).json({ error: "UNAUTHORIZED" });
   }
   next();
@@ -71,8 +87,7 @@ const getApiCallData = (req) => {
 
 const incrementApiUsage = async (req, res) => {
   const { route, method } = getApiCallData(req);
-  console.log("Incrementing API usage for", route, method);
-  const response = await axiosDB.put(`/api-calls/${req.session.userId}`, {
+  const response = await axiosDB.put(`/api-calls/${req.userData.id}`, {
     route,
     method,
   });
@@ -83,7 +98,7 @@ const incrementApiUsage = async (req, res) => {
 };
 
 const incrementApiUsageMiddleware = async (req, res, next) => {
-  if (req.method !== "OPTIONS" && req.session.userId) {
+  if (req.method !== "OPTIONS" && req.userData) {
     await incrementApiUsage(req, res);
   }
   next();
@@ -104,19 +119,6 @@ class ExpressServer {
       })
     );
     this.app.use(cookieParser());
-    this.app.use(
-      session({
-        secret: crypto.randomBytes(64).toString("hex"),
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-          secure: true,
-          httpOnly: true,
-          maxAge: 3600000,
-          sameSite: "none",
-        },
-      })
-    );
     this.app.use(incrementApiUsageMiddleware);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
@@ -161,12 +163,12 @@ class ExpressServer {
           email,
           password: hashedPassword,
         });
+
         if (newUser.status !== 201) {
           res.status(500).send("Error registering user");
           return;
         }
 
-        await incrementApiUsage(req, res);
         res.status(200).json("User registered successfully");
       } catch (error) {
         console.error("Error registering user:", error);
@@ -191,9 +193,11 @@ class ExpressServer {
         } = userInfo.data;
 
         const authResult = await axiosAuth.post(`/auth/login`, {
+          id,
           email,
           password,
           hashedPassword,
+          isAdmin,
         });
         res.cookie("jwt", authResult.data.accessToken, {
           secure: true,
@@ -201,10 +205,10 @@ class ExpressServer {
           maxAge: 3600000,
           sameSite: "none",
         });
-        req.session.userId = id;
-        req.session.isAdmin = isAdmin;
 
+        attachUserData(req, id, email, isAdmin);
         await incrementApiUsage(req, res);
+
         res.status(200).json({ name, isAdmin });
       } catch (error) {
         console.error("Error logging in:", error);
@@ -233,7 +237,7 @@ class ExpressServer {
         }
         const answer = MLResponse.data.answer;
         const response = await axiosDB.post("/prompts", {
-          userId: req.session.userId,
+          userId: req.userData.id,
           question,
           answer,
         });
@@ -246,7 +250,7 @@ class ExpressServer {
 
     router.get("/prompts", async (req, res) => {
       try {
-        const userId = req.session.userId;
+        const userId = req.userData.id;
         const response = await axiosDB.get(`/prompts/${userId}`);
         res.status(200).json(response.data);
       } catch (error) {
@@ -268,8 +272,8 @@ class ExpressServer {
    */
   createAdminRouter() {
     const router = express.Router();
-    router.use(isAdminMiddleware);
     router.use(isAuthenticatedMiddleware);
+    router.use(isAdminMiddleware);
 
     router.get("/users", async (req, res) => {
       try {
