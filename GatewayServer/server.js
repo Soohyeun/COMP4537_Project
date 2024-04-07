@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const validator = require('validator');
 require("dotenv").config();
 
 const apiMountPoint = process.env.API_MOUNT_POINT || "/";
@@ -74,10 +75,21 @@ const isAdminMiddleware = (req, res, next) => {
   next();
 };
 
-const incrementApiUsage = async (req, res) => {
-  const response = await axiosDB.put(`/api-calls/${req.userData.id}`, {
-    route: req.originalUrl,
+const getApiCallData = (req) => {
+  const path = req.originalUrl;
+  const match = path.match(/\/\w+\/api(\/\w+)/);
+
+  return {
+    route: match ? match[1] : path,
     method: req.method,
+  };
+};
+
+const incrementApiUsage = async (req, res) => {
+  const { route, method } = getApiCallData(req);
+  const response = await axiosDB.put(`/api-calls/${req.userData.id}`, {
+    route,
+    method,
   });
   if (response.data.api_calls) {
     res.setHeader("X-Api-Calls", response.data.api_calls);
@@ -125,6 +137,11 @@ class ExpressServer {
       try {
         const { name, email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
+
+        if (!validator.isEmail(email)) {
+          res.status(400).send("Email is invalid");
+        }
+
         if (Object.keys(userInfo.data).length !== 0) {
           res.status(409).send(`User with email "${email}" already exists`);
           return;

@@ -1,0 +1,62 @@
+{
+	"admin": {
+		"userTable": {
+			"headers": {
+				"id": "ID",
+				"username": "Name",
+				"email": "Email",
+				"queryCount": "Query Count"
+			}
+		},
+		"apiUsageTable": {
+			"headers": {
+				"route": "Route",
+				"count": "Total API Calls"
+			}
+		}
+	},
+	"landing": {
+		"title": "QueriGPT",
+        "login": "LOG IN",
+        "signup": "SIGN UP"
+	},
+    "login": {
+        "email": "Email",
+        "password": "Password",
+        "login": "LOG IN",
+        "redirectPrompt": "Don't have an account? Sign up"
+    },
+    "signup": {
+        "username": "Username",
+        "email": "Email",
+        "password": "Password",
+        "signup": "SIGN UP",
+        "redirectPrompt": "Already have an account? Log in"
+    },
+    "header": {
+        "title": "QueriGPT",
+        "navigation": {
+            "admin": "Admin",
+            "main": "Query",
+            "logout": "Logout"
+        }
+    },
+    "query": {
+        "queryCount": "Remaining Query Count: ",
+        "warning": "Exceeded maximum API usage..."
+    },
+    "chat": {
+        "number": "No. ",
+        "labels": {
+            "user": "User",
+            "bot": "Bot"
+        },
+        "buttons": {
+            "resend": "Resend",
+            "delete": "Delete"
+        }
+    },
+    "footer": {
+        "placeholder": "Query GPT..."
+    }
+}

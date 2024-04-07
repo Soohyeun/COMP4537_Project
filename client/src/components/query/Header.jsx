@@ -2,23 +2,26 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import URLContext from "../../contexts/URLContext";
 import { AdminContext } from "../../contexts/AdminContext";
+import en from "../../locales/en.json";
 
 export default function Header() {
+	const strings = en.header;
+
 	const { isAdmin } = useContext(AdminContext);
 	const url = useContext(URLContext);
 
 	return (
 		<header>
-			<h1>QueriGPT</h1>
+			<h1>{strings.title}</h1>
 			<nav>
 				<ul>
 					{isAdmin && (
 						<li>
-							<Link to="/admin">Admin</Link>
+							<Link to="/admin">{strings.navigation.admin}</Link>
 						</li>
 					)}
 					<li>
-						<Link to="/query">Query</Link>
+						<Link to="/query">{strings.navigation.main}</Link>
 					</li>
 					<li>
 						<Link
@@ -37,7 +40,7 @@ export default function Header() {
 								});
 							}}
 						>
-							Logout
+							{strings.navigation.logout}
 						</Link>
 					</li>
 				</ul>

@@ -5,8 +5,11 @@ import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import Header from "../query/Header";
 import URLContext from "../../contexts/URLContext";
 import { AdminContext } from "../../contexts/AdminContext";
+import en from "../../locales/en.json";
 
 export default function Admin() {
+	const strings = en.admin;
+
 	const navigate = useNavigate();
 	const { isAdmin } = useContext(AdminContext);
 	const url = useContext(URLContext);
@@ -64,10 +67,13 @@ export default function Admin() {
 			<table>
 				<thead>
 					<tr>
-						<th>ID</th>
-						<th>Username</th>
-						<th>Email</th>
-						<th>Query Count</th>
+						{Object.keys(strings.userTable.headers).map(
+							(header) => (
+								<th key={header}>
+									{strings.userTable.headers[header]}
+								</th>
+							)
+						)}
 						<th></th>
 					</tr>
 				</thead>
@@ -143,8 +149,13 @@ export default function Admin() {
 			<table>
 				<thead>
 					<tr>
-						<th>Route</th>
-						<th>Total API Calls</th>
+						{Object.keys(strings.apiUsageTable.headers).map(
+							(header) => (
+								<th key={header}>
+									{strings.apiUsageTable.headers[header]}
+								</th>
+							)
+						)}
 					</tr>
 				</thead>
 				<tbody>

@@ -39,7 +39,7 @@ class DatabaseServer {
     */
     router.get("/users", async (req, res) => {
       try {
-        const [rows] = await this.db.getUsers();
+        const rows = await this.db.getUsers();
         res.status(200).json(rows);
       } catch (error) {
         console.error("Error getting users:", error);

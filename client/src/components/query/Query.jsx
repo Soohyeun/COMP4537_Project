@@ -4,8 +4,11 @@ import ChatContainer from "./ChatContainer";
 import Header from "./Header";
 import Footer from "./Footer";
 import URLContext from "../../contexts/URLContext";
+import en from "../../locales/en.json";
 
 export default function Query() {
+	const strings = en.query;
+
 	const url = useContext(URLContext);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [queryCount] = useState(20);
@@ -40,9 +43,9 @@ export default function Query() {
 			<Header />
 			<main>
 				{chatHistory.length + 16 >= 20 ? (
-					<p className="query-count warning">Exceeded maximum API usage...</p>
+					<p className="query-count warning">{strings.warning}</p>
 				) : (
-					<p className="query-count">Remaining Query Count: {queryCount - chatHistory.length}</p>
+					<p className="query-count">{strings.queryCount}{queryCount - chatHistory.length}</p>
 				)}
 				{chatHistory.map((chat, index) => (
 					<ChatContainer

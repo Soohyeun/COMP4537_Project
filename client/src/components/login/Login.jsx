@@ -10,8 +10,11 @@ import { Form, Formik } from "formik";
 import loginSchema from "./loginSchema";
 import URLContext from "../../contexts/URLContext";
 import { AdminContext } from "../../contexts/AdminContext";
+import en from "../../locales/en.json";
 
 export default function Login() {
+	const strings = en.login;
+
 	const url = useContext(URLContext);
 	const { setIsAdmin } = useContext(AdminContext);
 	const navigate = useNavigate();
@@ -22,7 +25,6 @@ export default function Login() {
 				initialValues={{ email: "", password: "" }}
 				validationSchema={loginSchema}
 				onSubmit={(values, actions) => {
-					console.log(values);
 					actions.setSubmitting(false);
 
 					fetch(`${url}/auth/login`, {
@@ -49,7 +51,7 @@ export default function Login() {
 								navigate("/admin");
 								return;
 							}
-							
+
 							navigate("/query");
 							return;
 						})
@@ -68,7 +70,7 @@ export default function Login() {
 								formikProps.touched.email
 							}
 						>
-							<FormLabel>Email</FormLabel>
+							<FormLabel>{strings.email}</FormLabel>
 							<Input {...formikProps.getFieldProps("email")} />
 							<FormErrorMessage>
 								{formikProps.errors.email}
@@ -81,7 +83,7 @@ export default function Login() {
 								formikProps.touched.password
 							}
 						>
-							<FormLabel>Password</FormLabel>
+							<FormLabel>{strings.password}</FormLabel>
 							<Input
 								type="password"
 								{...formikProps.getFieldProps("password")}
@@ -95,15 +97,14 @@ export default function Login() {
 							type="submit"
 							disabled={formikProps.isSubmitting}
 						>
-							LOG IN
+							{strings.login}
 						</button>
 						{formikProps.status && (
-							<p className="error-message">{formikProps.status}</p>
+							<p className="error-message">
+								{formikProps.status}
+							</p>
 						)}
-						<Link to="/signup">
-							{/* eslint-disable-next-line react/no-unescaped-entities */}
-							Don't have an account? Sign Up
-						</Link>
+						<Link to="/signup">{strings.redirectPrompt}</Link>
 					</Form>
 				)}
 			</Formik>
