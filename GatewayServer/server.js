@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const validator = require('validator');
 require("dotenv").config();
 
 const apiMountPoint = process.env.API_MOUNT_POINT || "/";
@@ -122,6 +123,11 @@ class ExpressServer {
       try {
         const { name, email, password } = req.body;
         const userInfo = await axiosDB.get(`/users/${email}`);
+
+        if (!validator.isEmail(email)) {
+          res.status(400).send("Email is invalid");
+        }
+
         if (Object.keys(userInfo.data).length !== 0) {
           res.status(409).send(`User with email "${email}" already exists`);
           return;
