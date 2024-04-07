@@ -3,7 +3,6 @@ import en from "../../locales/en.json";
 
 export default function Landing() {
 	const strings = en.landing;
-	console.log(strings);
 
 	return (
 		<div className="landing">
