@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const validator = require('validator');
+const validator = require("validator");
 require("dotenv").config();
 
 const apiMountPoint = process.env.API_MOUNT_POINT || "/";
@@ -51,7 +51,7 @@ const isAuthenticatedMiddleware = async (req, res, next) => {
       token: jwtToken,
     });
 
-    if (!authResult.data) {
+    if (!authResult.data && !authResult.data.id) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
@@ -204,6 +204,7 @@ class ExpressServer {
           httpOnly: true,
           maxAge: 3600000,
           sameSite: "none",
+          partitioned: true,
         });
 
         attachUserData(req, id, email, isAdmin);
