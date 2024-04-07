@@ -9,8 +9,11 @@ import {
 import { Form, Formik } from "formik";
 import signupSchema from "./signupSchema";
 import URLContext from "../../contexts/URLContext";
+import en from "../../locales/en.json";
 
 export default function Signup() {
+	const strings = en.signup;
+
 	const url = useContext(URLContext);
 	const navigate = useNavigate();
 
@@ -20,7 +23,6 @@ export default function Signup() {
 				initialValues={{ name: "", email: "", password: "" }}
 				validationSchema={signupSchema}
 				onSubmit={(values, actions) => {
-					console.log(values);
 					actions.setSubmitting(true);
 
 					fetch(`${url}/auth/register`, {
@@ -59,7 +61,7 @@ export default function Signup() {
 								formikProps.touched.name
 							}
 						>
-							<FormLabel>Username</FormLabel>
+							<FormLabel>{strings.username}</FormLabel>
 							<Input {...formikProps.getFieldProps("name")} />
 							<FormErrorMessage>
 								{formikProps.errors.name}
@@ -72,7 +74,7 @@ export default function Signup() {
 								formikProps.touched.email
 							}
 						>
-							<FormLabel>Email</FormLabel>
+							<FormLabel>{strings.email}</FormLabel>
 							<Input {...formikProps.getFieldProps("email")} />
 							<FormErrorMessage>
 								{formikProps.errors.email}
@@ -85,7 +87,7 @@ export default function Signup() {
 								formikProps.touched.password
 							}
 						>
-							<FormLabel>Password</FormLabel>
+							<FormLabel>{strings.password}</FormLabel>
 							<Input
 								type="password"
 								{...formikProps.getFieldProps("password")}
@@ -99,14 +101,14 @@ export default function Signup() {
 							type="submit"
 							disabled={formikProps.isSubmitting}
 						>
-							SIGN UP
+							{strings.signup}
 						</button>
 						{formikProps.status && (
 							<p className="error-message">
 								{formikProps.status}
 							</p>
 						)}
-						<Link to="/login">Already have an account? Login</Link>
+						<Link to="/login">{strings.redirectPrompt}</Link>
 					</Form>
 				)}
 			</Formik>

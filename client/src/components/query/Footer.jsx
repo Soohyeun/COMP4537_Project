@@ -5,8 +5,11 @@ import { useFormik } from "formik";
 import QuerySchema from "./querySchema";
 import URLContext from "../../contexts/URLContext";
 import PropTypes from "prop-types";
+import en from "../../locales/en.json";
 
 export default function Footer({ onQuerySent }) {
+	const strings = en.footer;
+
 	const url = useContext(URLContext);
 	const formik = useFormik({
 		initialValues: {
@@ -31,7 +34,6 @@ export default function Footer({ onQuerySent }) {
 					return response.json();
 				})
 				.then((data) => {
-					console.log("Response:", data);
 					formik.resetForm();
 					onQuerySent();
 				})
@@ -47,7 +49,7 @@ export default function Footer({ onQuerySent }) {
 				<div>
 					<input
 						name="query"
-						placeholder={"Query GPT..."}
+						placeholder={strings.placeholder}
 						value={formik.values.query}
 						onChange={formik.handleChange}
 						onKeyDown={(event) => {

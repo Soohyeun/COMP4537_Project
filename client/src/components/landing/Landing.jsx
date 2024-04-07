@@ -1,14 +1,18 @@
 import { Link } from "react-router-dom";
+import en from "../../locales/en.json";
 
 export default function Landing() {
+	const strings = en.landing;
+	console.log(strings);
+
 	return (
 		<div className="landing">
-			<h1 className="landing-title">QueriGPT</h1>
+			<h1 className="landing-title">{strings.title}</h1>
 			<Link to="/login" className="landing-login-button">
-				LOGIN
+				{strings.login}
 			</Link>
 			<Link to="/signup" className="landing-signup-button">
-				SIGN UP
+				{strings.signup}
 			</Link>
 		</div>
 	);
