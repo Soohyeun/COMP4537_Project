@@ -119,7 +119,6 @@ class ExpressServer {
       })
     );
     this.app.use(cookieParser());
-    this.app.use(incrementApiUsageMiddleware);
     this.app.use(apiMountPoint, this.createAuthRouter());
     this.app.use(apiMountPoint, this.createAuthenticatedUserRouter());
     this.app.use(apiMountPoint, this.createAdminRouter());
@@ -226,6 +225,7 @@ class ExpressServer {
   createAuthenticatedUserRouter() {
     const router = express.Router();
     router.use(isAuthenticatedMiddleware);
+    router.use(incrementApiUsageMiddleware);
 
     router.post("/prompts", async (req, res) => {
       try {
@@ -275,6 +275,7 @@ class ExpressServer {
     const router = express.Router();
     router.use(isAuthenticatedMiddleware);
     router.use(isAdminMiddleware);
+    router.use(incrementApiUsageMiddleware);
 
     router.get("/users", async (req, res) => {
       try {
