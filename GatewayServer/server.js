@@ -77,7 +77,7 @@ const isAdminMiddleware = (req, res, next) => {
 
 const getApiCallData = (req) => {
   const path = req.originalUrl;
-  const match = path.match(/\/\w+\/api\/v\d+(\/\w+)/);
+  const match = path.match(/\/\w+\/api\/v\d+(\/.*)/);
 
   return {
     route: match ? match[1] : path,
