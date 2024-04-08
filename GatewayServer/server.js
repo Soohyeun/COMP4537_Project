@@ -140,6 +140,7 @@ class ExpressServer {
 
         if (!validator.isEmail(email)) {
           res.status(400).send("Email is invalid");
+          return;
         }
 
         if (Object.keys(userInfo.data).length !== 0) {
